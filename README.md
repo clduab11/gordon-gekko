@@ -136,13 +136,13 @@
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| **Backend** | Python 3.11+ | High-performance trading logic |
+| **Backend** | Rust 1.75+ | High-performance trading logic |
 | **Database** | PostgreSQL (Supabase) | Relational data storage |
 | **Cache** | Redis | Session and data caching |
-| **ML/AI** | PyTorch, TensorFlow | Machine learning models |
-| **GPU** | Apple MPS / CUDA | Hardware acceleration |
+| **ML/AI** | ruv-FANN + CUDA | Neural network models |
+| **GPU** | CUDA 11.8+ / wgpu | Hardware acceleration |
 | **Web** | React / WebSocket | Real-time dashboard |
-| **API** | FastAPI / REST | External integrations |
+| **API** | Axum / REST | External integrations |
 | **Security** | JWT / OAuth2 | Authentication & authorization |
 | **Monitoring** | Prometheus / Grafana | System observability |
 | **Orchestration** | Docker / Kubernetes | Container management |
@@ -154,60 +154,69 @@
 ### **Prerequisites**
 
 - **Operating System**: macOS 12+ (Apple Silicon optimized) or Linux
-- **Python**: 3.11 or higher
+- **Rust**: 1.75 or higher with Cargo package manager
 - **Docker**: 20.10 or higher
 - **Redis**: 6.0 or higher
-- **GPU Support**: Apple M1/M2 or NVIDIA GPU (optional but recommended)
+- **GPU Support**: NVIDIA GPU with CUDA 11.8+ (optional but recommended)
 - **Memory**: 16GB RAM minimum, 32GB recommended
 - **Storage**: 100GB SSD space
 
 ### **Installation**
 
 1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-org/gordon-gekko.git
-   cd gordon-gekko
-   ```
+    ```bash
+    git clone https://github.com/your-org/gordon-gekko.git
+    cd gordon-gekko
+    ```
 
-2. **Environment Setup**
-   ```bash
-   # Create virtual environment
-   python -m venv gordon-gekko-env
-   source gordon-gekko-env/bin/activate  # On Windows: gordon-gekko-env\Scripts\activate
+2. **Rust Environment Setup**
+    ```bash
+    # Verify Rust installation
+    rustc --version
+    cargo --version
 
-   # Install dependencies
-   pip install -r requirements.txt
-   ```
+    # Add required Rust targets (if needed)
+    rustup target add x86_64-unknown-linux-gnu
+    ```
 
 3. **Docker Services**
-   ```bash
-   # Start core services
-   docker-compose up -d redis postgres
+    ```bash
+    # Start core services
+    docker-compose up -d redis postgres
 
-   # Verify services
-   docker-compose ps
-   ```
+    # Verify services
+    docker-compose ps
+    ```
 
-4. **System Initialization**
-   ```bash
-   # Initialize the trading system
-   python -m gordon_gekko init
+4. **Build the Application**
+    ```bash
+    # Build the Rust application
+    cargo build --release
 
-   # Configure environment variables
-   cp .env.example .env
-   # Edit .env with your API keys and configuration
-   ```
+    # Run tests to verify installation
+    cargo test
+    ```
 
-5. **Launch Dashboard**
-   ```bash
-   # Start the web interface
-   python -m gordon_gekko web --port 8080
-   ```
+5. **System Initialization**
+    ```bash
+    # Initialize the trading system
+    ./target/release/gordon-gekko init
 
-6. **Access the System**
-   - **Web Interface**: http://localhost:8080
-   - **API Documentation**: http://localhost:8080/docs
-   - **Health Check**: http://localhost:8080/health
+    # Configure environment variables
+    cp .env.example .env
+    # Edit .env with your API keys and configuration
+    ```
+
+6. **Launch Dashboard**
+    ```bash
+    # Start the web interface
+    ./target/release/gordon-gekko web --port 8080
+    ```
+
+7. **Access the System**
+    - **Web Interface**: http://localhost:8080
+    - **API Documentation**: http://localhost:8080/docs
+    - **Health Check**: http://localhost:8080/health
 
 ### **Basic Configuration**
 
@@ -221,17 +230,19 @@ OANDA_API_KEY=your_oanda_key
 OPENROUTER_API_KEY=your_openrouter_key
 LITELLM_API_KEY=your_litellm_key
 
-# Database Configuration
-DATABASE_URL=postgresql://user:pass@localhost:5432/gordon_gekko
+# Database Configuration (Supabase PostgreSQL)
+DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 REDIS_URL=redis://localhost:6379
 
 # Security Configuration
-JWT_SECRET_KEY=your_jwt_secret
-ENCRYPTION_KEY=your_encryption_key
+JWT_SECRET_KEY=your_jwt_secret_key_32_chars_min
+ENCRYPTION_KEY=your_encryption_key_32_chars
+RUST_LOG=info
 
 # System Configuration
 LOG_LEVEL=INFO
 DEBUG=false
+RUST_BACKTRACE=1
 ```
 
 ---
