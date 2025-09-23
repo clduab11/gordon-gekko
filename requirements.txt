@@ -1,0 +1,85 @@
+# Core dependencies (from pyproject.toml)
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Async and concurrency
+asyncio-mqtt>=0.16.0
+aiohttp>=3.9.0
+httpx>=0.25.0
+
+# Data processing and analysis
+pandas>=2.1.0
+numpy>=1.25.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# Machine Learning and AI
+torch>=2.1.0
+torchvision>=0.16.0
+transformers>=4.35.0
+accelerate>=0.24.0
+
+# Database and caching
+sqlalchemy>=2.0.0
+redis>=5.0.0
+databases>=0.8.0
+
+# Trading platform integrations
+coinbase-advanced-py>=1.0.0
+binance-connector>=3.0.0
+oanda-python>=0.1.0
+
+# Security and authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# Configuration and environment
+python-dotenv>=1.0.0
+dynaconf>=3.2.0
+
+# Logging and monitoring
+structlog>=23.2.0
+prometheus-client>=0.19.0
+
+# Utilities
+click>=8.1.0
+rich>=13.7.0
+typer>=0.9.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-benchmark>=4.0.0
+
+# Optional GPU acceleration
+# Install with: pip install -r requirements.txt
+# For CUDA: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# For MPS (Apple Silicon): already included in base torch installation
+
+# Optional development tools
+# Install with: pip install -r requirements-dev.txt
+# black>=23.0.0
+# isort>=5.12.0
+# flake8>=6.0.0
+# mypy>=1.7.0
+# pre-commit>=3.5.0
+# ruff>=0.1.0
+
+# Optional web interface
+# Install with: pip install -r requirements-web.txt
+# streamlit>=1.28.0
+# plotly>=5.17.0
+# dash>=2.14.0
+# bokeh>=3.3.0
+
+# Optional Jupyter support
+# Install with: pip install -r requirements-jupyter.txt
+# jupyter>=1.0.0
+# ipykernel>=6.26.0
+# matplotlib>=3.8.0
+# seaborn>=0.13.0
