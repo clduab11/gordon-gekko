@@ -12,6 +12,13 @@
 //! - **⚡ GPU Acceleration**: CUDA and Metal Performance Shaders
 //! - **🌐 WebAssembly**: Universal deployment capability
 //!
+//! ## Architecture
+//!
+//! The system is organized into modular crates:
+//! - `core`: Core types, error handling, and trading system orchestration
+//! - `database`: Database operations, caching, and real-time subscriptions
+//! - `api`: REST and WebSocket APIs with comprehensive security
+//!
 //! ## Quick Start
 //!
 //! ```rust

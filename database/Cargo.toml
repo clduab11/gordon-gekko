@@ -1,0 +1,47 @@
+[package]
+name = "gordon-gekko-database"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+
+# Database & caching
+sqlx = { workspace = true }
+redis = { workspace = true }
+
+# Configuration
+config = { workspace = true }
+
+# Cryptography for checksums and hashing
+sha2 = "0.10"
+
+# Additional utilities
+once_cell = "1.19"
+dashmap = "5.5"
+
+# HTTP client for Supabase integration
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+
+# JWT handling
+jsonwebtoken = "9.2"
+
+# Environment variable handling
+envy = "0.4"
+
+[dev-dependencies]
+# Testing utilities
+tempfile = "3.8"
+tokio-test = "0.4"
+
+# Mocking for tests
+mockall = "0.12"

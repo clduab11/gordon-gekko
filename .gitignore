@@ -1,6 +1,7 @@
 # Rust build artifacts
 /target/
-/Cargo.lock
+**/target/
+Cargo.lock
 
 # Python artifacts (legacy from Gordon Gekko)
 __pycache__/

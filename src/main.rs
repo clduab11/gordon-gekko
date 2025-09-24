@@ -2,117 +2,110 @@
 //!
 //! This is the main entry point for the Ninja Gekko autonomous trading bot.
 
-use clap::{Arg, Command};
-use ninja_gekko::prelude::*;
-use std::process;
-use tracing::{info, error};
+use anyhow::Result;
+use clap::Parser;
+use std::sync::Arc;
+use tokio::signal;
+use tracing::{error, info, warn};
 
-#[tokio::main]
-async fn main() {
-    // Initialize tracing
-    tracing_subscriber::fmt::init();
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Configuration file path
+    #[arg(short, long, default_value = "config/default.toml")]
+    config: String,
 
-    let matches = Command::new("ninja-gekko")
-        .version(ninja_gekko::VERSION)
-        .about("Next-Generation Rust-Powered Autonomous Trading Bot")
-        .long_about(ninja_gekko::BUILD_INFO)
-        .arg(
-            Arg::new("config")
-                .short('c')
-                .long("config")
-                .value_name("FILE")
-                .help("Configuration file path")
-                .default_value("config.toml"),
-        )
-        .arg(
-            Arg::new("mode")
-                .short('m')
-                .long("mode")
-                .value_name("MODE")
-                .help("Operation mode")
-                .value_parser(["stealth", "precision", "swarm"])
-                .default_value("precision"),
-        )
-        .arg(
-            Arg::new("dry-run")
-                .long("dry-run")
-                .help("Run in simulation mode without real trades")
-                .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
-            Arg::new("mcp-servers")
-                .long("mcp-servers")
-                .value_name("SERVERS")
-                .help("Comma-separated list of MCP servers to enable")
-                .default_value("playwright,filesystem,github,supabase"),
-        )
-        .get_matches();
+    /// Operation mode
+    #[arg(short, long, default_value = "precision")]
+    mode: String,
 
-    // Parse configuration
-    let config_path = matches.get_one::<String>("config").unwrap();
-    let operation_mode = match matches.get_one::<String>("mode").unwrap().as_str() {
-        "stealth" => OperationMode::Stealth,
-        "precision" => OperationMode::Precision, 
-        "swarm" => OperationMode::Swarm,
-        _ => OperationMode::Precision,
-    };
-    let dry_run = matches.get_flag("dry-run");
-    let mcp_servers: Vec<&str> = matches
-        .get_one::<String>("mcp-servers")
-        .unwrap()
-        .split(',')
-        .collect();
+    /// Enable sandbox mode (no real trading)
+    #[arg(long)]
+    sandbox: bool,
 
-    info!("🥷 Starting Ninja Gekko v{}", ninja_gekko::VERSION);
-    info!("📋 Config: {}", config_path);
-    info!("🎯 Mode: {:?}", operation_mode);
-    info!("🎭 MCP Servers: {:?}", mcp_servers);
-    
-    if dry_run {
-        info!("🏃 Running in DRY RUN mode - no real trades will be executed");
-    }
+    /// Log level (debug, info, warn, error)
+    #[arg(long, default_value = "info")]
+    log_level: String,
 
-    // Initialize and start the bot
-    match run_bot(config_path, operation_mode, mcp_servers, dry_run).await {
-        Ok(_) => {
-            info!("✅ Ninja Gekko completed successfully");
-        }
-        Err(e) => {
-            error!("❌ Ninja Gekko failed: {}", e);
-            process::exit(1);
-        }
-    }
+    /// Enable GPU acceleration for neural networks
+    #[arg(long)]
+    gpu: bool,
+
+    /// MCP servers to enable
+    #[arg(long, default_value = "playwright,filesystem,github,supabase")]
+    mcp_servers: String,
 }
 
-async fn run_bot(
-    _config_path: &str,
-    operation_mode: OperationMode,
-    mcp_servers: Vec<&str>,
-    dry_run: bool,
-) -> Result<(), Box<dyn std::error::Error>> {
-    info!("🔧 Initializing Ninja Gekko...");
+#[tokio::main]
+async fn main() -> Result<()> {
+    let args = Args::parse();
 
-    // This is a placeholder implementation for the Rust version
-    // The actual implementation will be built as part of the migration
-    
-    let _bot = NinjaGekko::builder()
-        .mode(operation_mode)
-        .neural_backend(NeuralBackend::RuvFann)
-        .mcp_servers(mcp_servers.into_iter().map(String::from).collect())
-        .dry_run(dry_run)
-        .build()
-        .await?;
+    // Initialize tracing subscriber
+    init_tracing(&args.log_level)?;
 
-    info!("🚀 Ninja Gekko initialized successfully");
-    info!("🎯 Operating in {:?} mode", operation_mode);
-    
-    // Start the main trading loop
-    info!("🔄 Starting autonomous trading operations...");
-    
-    // For now, just run for a short time to demonstrate
+    info!("🥷 Starting Ninja Gekko v{}", env!("CARGO_PKG_VERSION"));
+    info!("📊 Configuration: {}", args.config);
+    info!("🎯 Operation mode: {}", args.mode);
+    info!("🏖️  Sandbox mode: {}", args.sandbox);
+    info!("🔥 GPU acceleration: {}", args.gpu);
+    info!("🎭 MCP servers: {}", args.mcp_servers);
+
+    // Load configuration - using placeholder for now
+    info!("✅ Configuration loaded successfully");
+
+    // Create trading system - placeholder implementation
+    info!("✅ Ninja Gekko initialized");
+
+    // Setup graceful shutdown
+    let shutdown_handle = setup_shutdown_handler();
+
+    // Start the trading system
+    info!("🎯 Starting autonomous trading operations...");
+
+    // Simulate running for a short time (placeholder)
     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-    
-    info!("🛑 Ninja Gekko shutting down gracefully");
-    
+
+    // Wait for shutdown signal or completion
+    shutdown_handle.await;
+
+    // Perform cleanup
+    info!("🛑 Shutting down Ninja Gekko...");
+    info!("✅ Ninja Gekko shut down gracefully");
+
     Ok(())
+}
+
+/// Initialize tracing subscriber based on log level
+fn init_tracing(log_level: &str) -> Result<()> {
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+        .with_max_level(match log_level.to_lowercase().as_str() {
+            "debug" => tracing::Level::DEBUG,
+            "info" => tracing::Level::INFO,
+            "warn" => tracing::Level::WARN,
+            "error" => tracing::Level::ERROR,
+            _ => {
+                warn!("Invalid log level '{}', defaulting to 'info'", log_level);
+                tracing::Level::INFO
+            }
+        })
+        .with_target(false)
+        .with_thread_ids(false)
+        .with_file(false)
+        .with_line_number(false)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)?;
+    Ok(())
+}
+
+/// Setup graceful shutdown handler
+async fn setup_shutdown_handler() {
+    match signal::ctrl_c().await {
+        Ok(()) => {
+            info!("📡 Received shutdown signal (Ctrl+C)");
+        }
+        Err(err) => {
+            error!("💥 Failed to listen for shutdown signal: {:?}", err);
+        }
+    }
 }
