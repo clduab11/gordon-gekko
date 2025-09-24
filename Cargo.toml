@@ -1,0 +1,150 @@
+[package]
+name = "ninja-gekko"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.80"
+authors = ["Ninja Gekko Development Team <contact@ninja-gekko.ai>"]
+description = "Next-Generation Rust-Powered Autonomous Trading Bot with Advanced MCP Intelligence"
+documentation = "https://docs.ninja-gekko.ai"
+repository = "https://github.com/clduab11/ninja-gekko"
+license = "MIT"
+keywords = ["trading", "neural-networks", "autonomous-bot", "mcp", "rust"]
+categories = ["algorithms", "finance", "science", "web-programming", "wasm"]
+readme = "README.md"
+
+[lib]
+name = "ninja_gekko"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "ninja-gekko"
+path = "src/main.rs"
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.40", features = ["full"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# Neural networks (placeholder versions - will be updated during implementation)
+# ruv-fann = { version = "0.1", optional = true }
+ndarray = { version = "0.16", optional = true }
+# candle-core = { version = "0.8", optional = true }
+# candle-nn = { version = "0.8", optional = true }
+# tch = { version = "0.16", optional = true }
+
+# Web and HTTP
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+
+# Database and storage (optional for now)
+# sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+# redis = { version = "0.27", features = ["tokio-comp", "connection-manager"] }
+
+# Configuration and environment
+# config = "0.14"
+# dotenvy = "0.15"
+clap = { version = "4.5", features = ["derive"] }
+
+# Logging and observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# prometheus = "0.13"
+# opentelemetry = "0.24"
+
+# Crypto and security (optional)
+# ring = "0.17"
+# rustls = "0.23"
+uuid = { version = "1.11", features = ["v4", "serde"] }
+
+# Time and date
+chrono = { version = "0.4", features = ["serde"] }
+# time = "0.3"
+
+# Mathematical operations (optional)
+# num-traits = "0.2"
+# statrs = "0.17"
+
+# WASM support (optional)
+# wasm-bindgen = { version = "0.2", optional = true }
+# js-sys = { version = "0.3", optional = true }
+# web-sys = { version = "0.3", optional = true }
+
+# MCP integration (placeholder - will be implemented)
+# mcp-core = { version = "0.1", optional = true }
+# mcp-client = { version = "0.1", optional = true }
+
+# Trading platform APIs (will be added during implementation)
+# coinbase-pro = { version = "0.1", optional = true }
+# binance = { version = "0.21", optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.5"
+mock_instant = "0.5"
+
+[features]
+default = [] # Features will be enabled during migration
+
+# Neural network backends (will be enabled during implementation)
+neural-networks = [] # ["ruv-fann", "candle-core", "candle-nn"]
+pytorch = [] # ["tch"]
+
+# MCP integration (will be enabled during implementation)
+mcp-integration = [] # ["mcp-core", "mcp-client"]
+
+# WebAssembly support (will be enabled during implementation)
+# wasm = ["wasm-bindgen", "js-sys", "web-sys"]
+wasm = []
+
+# Trading platform integrations (will be enabled during implementation)
+trading-platforms = [] # ["coinbase-pro", "binance"]
+
+# GPU acceleration (will be enabled during implementation)
+# gpu-nvidia = ["tch/cuda"]
+gpu-nvidia = []
+gpu-metal = []
+
+# Development features
+dev = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[profile.bench]
+opt-level = 3
+debug = true
+
+# Benchmarks will be added during implementation
+# [[bench]]
+# name = "neural_inference"
+# harness = false
+
+[package.metadata.wasm-pack.profile.release]
+wee_alloc = false
+
+[workspace]
+members = [
+    "crates/neural-engine",
+    "crates/mcp-client", 
+    "crates/trading-core",
+    "crates/swarm-intelligence"
+]
+
+[workspace.dependencies]
+# Shared dependencies across workspace
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"

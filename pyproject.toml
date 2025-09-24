@@ -3,21 +3,21 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gordon-gekko"
-version = "1.0.0"
-description = "Autonomous Trading Agent with Advanced ML and Multi-Platform Integration"
+name = "ninja-gekko"
+version = "2.0.0"
+description = "Next-Generation Rust-Powered Autonomous Trading Bot with Advanced MCP Intelligence"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Gordon Gekko Development Team", email = "contact@gordongekko.ai"}
+    {name = "Ninja Gekko Development Team", email = "contact@ninja-gekko.ai"}
 ]
 maintainers = [
-    {name = "Gordon Gekko Development Team", email = "contact@gordongekko.ai"}
+    {name = "Ninja Gekko Development Team", email = "contact@ninja-gekko.ai"}
 ]
 keywords = [
-    "trading", "algorithmic-trading", "machine-learning", "multi-platform",
-    "risk-management", "quantitative-finance", "gpu-acceleration",
-    "microservices", "real-time", "financial-technology"
+    "trading", "algorithmic-trading", "rust", "neural-networks", "autonomous-bot",
+    "mcp-integration", "swarm-intelligence", "gpu-acceleration", "webassembly",
+    "real-time", "financial-technology", "ruv-fann", "flow-nexus", "ninja-gekko"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -139,14 +139,14 @@ all = [
 ]
 
 [project.scripts]
-gordon-gekko = "gordon_gekko.cli.main:main"
+ninja-gekko = "ninja_gekko.cli.main:main"
 
 [project.urls]
-Homepage = "https://gordongekko.ai"
-Documentation = "https://docs.gordongekko.ai"
-Repository = "https://github.com/gordon-gekko/trading-agent"
-Issues = "https://github.com/gordon-gekko/trading-agent/issues"
-Changelog = "https://github.com/gordon-gekko/trading-agent/blob/main/CHANGELOG.md"
+Homepage = "https://ninja-gekko.ai"
+Documentation = "https://docs.ninja-gekko.ai"  
+Repository = "https://github.com/clduab11/ninja-gekko"
+Issues = "https://github.com/clduab11/ninja-gekko/issues"
+Changelog = "https://github.com/clduab11/ninja-gekko/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

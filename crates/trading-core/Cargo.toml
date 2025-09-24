@@ -1,0 +1,10 @@
+[package]
+name = "trading-core"
+version = "2.0.0"
+edition = "2021"
+description = "Trading core for Ninja Gekko"
+
+[dependencies]
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
