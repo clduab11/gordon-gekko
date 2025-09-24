@@ -1,0 +1,10 @@
+[package]
+name = "neural-engine"
+version = "2.0.0"
+edition = "2021"
+description = "Neural network engine for Ninja Gekko"
+
+[dependencies]
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
