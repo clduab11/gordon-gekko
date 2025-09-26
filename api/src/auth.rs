@@ -151,7 +151,7 @@ impl AuthMiddleware {
             sub: user_id.to_string(),
             iat: Utc::now().timestamp() as usize,
             exp: (Utc::now() + Duration::hours(1)).timestamp() as usize, // 1 hour expiry
-            iss: Some("gordon-gekko-api".to_string()),
+            iss: Some("ninja-gekko-api".to_string()),
             aud: Some("trading-platform".to_string()),
             roles,
             account_ids,
@@ -174,7 +174,7 @@ impl AuthMiddleware {
             sub: user_id.to_string(),
             iat: Utc::now().timestamp() as usize,
             exp: (Utc::now() + Duration::days(30)).timestamp() as usize, // 30 days expiry
-            iss: Some("gordon-gekko-api".to_string()),
+            iss: Some("ninja-gekko-api".to_string()),
             aud: Some("trading-platform".to_string()),
             roles,
             account_ids,

@@ -4,7 +4,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
-/// Core trading types and data structures for the Gordon Gekko trading system.
+/// Core trading types and data structures for the Ninja Gekko trading system.
 ///
 /// This module defines the fundamental types used throughout the trading engine
 /// including orders, positions, executions, and market data structures.

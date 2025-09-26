@@ -1,7 +1,7 @@
 //! Environment variable validation and secure configuration management
 //!
 //! This module provides secure environment variable validation, configuration
-//! management, and runtime security checks for the Gordon Gekko API.
+//! management, and runtime security checks for the Ninja Gekko API.
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

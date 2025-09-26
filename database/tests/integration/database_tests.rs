@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod database_tests {
     use super::*;
-    use gordon_gekko_database::database::*;
-    use gordon_gekko_database::config::*;
-    use gordon_gekko_database::error::DatabaseError;
+    use ninja_gekko_database::database::*;
+    use ninja_gekko_database::config::*;
+    use ninja_gekko_database::error::DatabaseError;
     use sqlx::postgres::PgPoolOptions;
     use sqlx::{Pool, Postgres};
     use std::time::Duration;

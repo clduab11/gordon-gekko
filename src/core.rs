@@ -131,6 +131,7 @@ impl NinjaGekkoBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mcp::servers;
     
     #[test]
     fn test_operation_mode_display() {
@@ -144,7 +145,7 @@ mod tests {
         let result = NinjaGekko::builder()
             .mode(OperationMode::Stealth)
             .neural_backend(NeuralBackend::RuvFann)
-            .mcp_servers(vec!["test".to_string()])
+            .mcp_servers(vec![servers::PLAYWRIGHT.to_string()])
             .dry_run(true)
             .build()
             .await;

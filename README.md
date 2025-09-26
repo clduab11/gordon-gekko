@@ -23,9 +23,9 @@
 
 ---
 
-## 🌟 **The Evolution: From Gordon to Ninja**
+## 🌟 **The Evolution of Ninja Gekko**
 
-**Ninja Gekko** represents the next evolutionary leap in autonomous trading technology. What started as Gordon Gekko has been completely reimagined and rebuilt from the ground up in **Rust** with native **MCP (Model Context Protocol)** integration.
+**Ninja Gekko** represents the next evolutionary leap in autonomous trading technology. The platform has been completely reimagined and rebuilt from the ground up in **Rust** with native **MCP (Model Context Protocol)** integration.
 
 ### **🥷 Why "Ninja"?**
 - **Stealth Operation**: Executes trades with minimal market impact and maximum discretion
@@ -172,7 +172,7 @@ Native Model Context Protocol integration with 70+ servers:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     Gordon Gekko Trading System                     │
+│                     Ninja Gekko Trading System                     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────────────────────────────────────────────┐  │
 │  │                    Web UI & API Layer                           │  │
@@ -234,8 +234,8 @@ Native Model Context Protocol integration with 70+ servers:
 
 1. **Clone the Repository**
     ```bash
-    git clone https://github.com/your-org/gordon-gekko.git
-    cd gordon-gekko
+    git clone https://github.com/your-org/ninja-gekko.git
+    cd ninja-gekko
     ```
 
 2. **Rust Environment Setup**
@@ -268,18 +268,25 @@ Native Model Context Protocol integration with 70+ servers:
 
 5. **System Initialization**
     ```bash
-    # Initialize the trading system
-    ./target/release/gordon-gekko init
+    # Run the autonomous trading bot (precision mode, sandboxed)
+    cargo run --release -- \
+      --config config/default.toml \
+      --mode precision \
+      --sandbox
 
     # Configure environment variables
     cp .env.example .env
     # Edit .env with your API keys and configuration
     ```
 
-6. **Launch Dashboard**
+6. **Launch Telemetry-Only Session**
     ```bash
-    # Start the web interface
-    ./target/release/gordon-gekko web --port 8080
+    # Stream metrics without live trading
+    cargo run -- \
+      --config config/default.toml \
+      --mode swarm \
+      --log-level debug \
+      --sandbox
     ```
 
 7. **Access the System**
@@ -347,7 +354,7 @@ RUST_BACKTRACE=1
 
 ### **🛡️ Security Architecture**
 
-Gordon Gekko implements a comprehensive security framework designed for institutional trading:
+Ninja Gekko implements a comprehensive security framework designed for institutional trading:
 
 #### **Authentication & Authorization**
 - **Multi-Factor Authentication**: SMS, TOTP, and hardware token support
@@ -421,7 +428,7 @@ Gordon Gekko implements a comprehensive security framework designed for institut
 
 ```bash
 # Core System Configuration
-SYSTEM_NAME=Gordon Gekko Autonomous Trading Agent
+SYSTEM_NAME=Ninja Gekko Autonomous Trading Agent
 LOG_LEVEL=INFO
 DEBUG=false
 
@@ -492,89 +499,108 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url
 
 ### **🚀 Basic Trading Operations**
 
-```python
-from gordon_gekko import TradingSystem
+```rust
+use ninja_gekko::prelude::*;
+use ninja_gekko::trading::{TradingEngine, Strategy};
 
-# Initialize the trading system
-trading_system = TradingSystem(
-    config_path="config/production.yaml",
-    log_level="INFO"
-)
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt().init();
 
-# Connect to trading platforms
-trading_system.connect_platforms([
-    "coinbase",
-    "binance_us",
-    "oanda"
-])
+    let bot = NinjaGekko::builder()
+        .mode(OperationMode::Precision)
+        .neural_backend(NeuralBackend::RuvFann)
+        .mcp_servers(vec![
+            "playwright".to_string(),
+            "supabase".to_string(),
+            "redis".to_string(),
+        ])
+        .build()
+        .await?;
 
-# Start autonomous trading
-trading_system.start_autonomous_trading(
-    strategies=["momentum", "ml_based"],
-    risk_profile="moderate"
-)
+    bot.start().await?;
 
-# Monitor performance
-portfolio = trading_system.get_portfolio()
-print(f"Current P&L: {portfolio.total_pnl}")
-print(f"Active Positions: {len(portfolio.positions)}")
+    let engine = TradingEngine::new(Strategy::Momentum);
+    println!("Trading engine ready: {:?}", engine);
 
-# Execute manual trade
-result = trading_system.execute_trade(
-    symbol="BTC-USD",
-    side="buy",
-    quantity=0.1,
-    order_type="limit",
-    price=45000.00
-)
-
-print(f"Trade executed: {result.status}")
+    Ok(())
+}
 ```
 
 ### **📈 Portfolio Management**
 
-```python
-# Get comprehensive portfolio analysis
-portfolio_analysis = trading_system.analyze_portfolio()
+```rust
+use ninja_gekko::trading::Position;
+use ninja_gekko::utils::utils::{format_currency, percentage_change};
 
-print(f"Total Portfolio Value: ${portfolio_analysis.total_value}")
-print(f"Daily P&L: ${portfolio_analysis.daily_pnl}")
-print(f"Risk Metrics: {portfolio_analysis.risk_metrics}")
+fn main() {
+    let positions = vec![
+        Position {
+            id: "BTC-001".to_string(),
+            symbol: "BTC-USD".to_string(),
+            size: 0.5,
+            entry_price: 42_500.0,
+            pnl: 2_150.75,
+        },
+        Position {
+            id: "ETH-002".to_string(),
+            symbol: "ETH-USD".to_string(),
+            size: 5.0,
+            entry_price: 2_100.0,
+            pnl: 730.10,
+        },
+    ];
 
-# Rebalance portfolio
-rebalancing_result = trading_system.rebalance_portfolio(
-    target_allocation={
-        "BTC": 0.4,
-        "ETH": 0.3,
-        "USD": 0.3
-    },
-    max_trades=5
-)
+    let total_pnl: f64 = positions.iter().map(|p| p.pnl).sum();
+    println!("Total Portfolio P&L: {}", format_currency(total_pnl));
 
-print(f"Rebalancing completed: {rebalancing_result.success}")
+    let btc_change = percentage_change(42_500.0, 45_200.0);
+    println!("BTC price change: {:.2}%", btc_change);
+}
 ```
 
 ### **🧠 Machine Learning Integration**
 
-```python
-# Get ML predictions
-ml_predictions = trading_system.get_ml_predictions(
-    symbols=["BTC-USD", "ETH-USD"],
-    timeframe="1h"
-)
+```rust
+use ninja_gekko::neural::{NeuralBackend, NeuralEngine, MarketData, PositionData};
 
-for symbol, prediction in ml_predictions.items():
-    print(f"{symbol}: {prediction.direction} @ {prediction.confidence}%")
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let mut engine = NeuralEngine::new(NeuralBackend::RuvFann);
+    engine.load_models().await?;
 
-# Train custom ML model
-training_result = trading_system.train_custom_model(
-    model_name="custom_strategy_v1",
-    training_data="path/to/training_data.csv",
-    model_type="gradient_boosting",
-    features=["price", "volume", "sentiment"]
-)
+    let market_data = MarketData {
+        symbol: "BTC-USD".to_string(),
+        price: 52_000.0,
+        volume: 1_250.0,
+        timestamp: chrono::Utc::now(),
+    };
 
-print(f"Model trained: {training_result.accuracy}")
+    let prediction = engine.predict_price("BTC-USD", &market_data).await?;
+    println!(
+        "Predicted price for {}: ${:.2} (confidence {:.1}%)",
+        prediction.symbol,
+        prediction.predicted_price,
+        prediction.confidence * 100.0
+    );
+
+    let risk = engine
+        .assess_risk(&PositionData {
+            symbol: "BTC-USD".to_string(),
+            entry_price: 48_000.0,
+            position_size: 0.75,
+            portfolio_value: 250_000.0,
+        })
+        .await?;
+
+    println!(
+        "Risk score: {:.1}%, max position: ${:.2}",
+        risk.risk_score * 100.0,
+        risk.max_position_size
+    );
+
+    Ok(())
+}
 ```
 
 ---
@@ -678,10 +704,10 @@ export LOG_LEVEL=DEBUG
 export DEBUG=true
 
 # Start system with verbose output
-python -m gordon_gekko --verbose --debug
+cargo run -- --verbose --debug
 
 # Enable performance profiling
-python -m cProfile -s time gordon_gekko/main.py
+cargo bench --profile release
 ```
 
 ---
@@ -694,30 +720,29 @@ We welcome contributions from the community! Please see our [Contributing Guide]
 
 ```bash
 # Fork and clone the repository
-git clone https://github.com/your-username/gordon-gekko.git
-cd gordon-gekko
+git clone https://github.com/your-username/ninja-gekko.git
+cd ninja-gekko
 
 # Set up development environment
-python -m venv dev-env
-source dev-env/bin/activate
-pip install -r requirements-dev.txt
+rustup toolchain install stable
+cargo fetch
 
 # Run tests
-pytest tests/
+cargo test --all
 
 # Run linting
-flake8 gordon_gekko/
-black gordon_gekko/
+cargo fmt -- --check
+cargo clippy --all-targets -- -D warnings
 
 # Start development server
-python -m gordon_gekko dev --reload
+cargo run -- --mode dev
 ```
 
 ### **Code Standards**
 
-- **Python PEP 8**: Follow official Python style guide
-- **Type Hints**: Use comprehensive type annotations
-- **Documentation**: Docstrings for all public methods
+- **Rust API Guidelines**: Follow official idiomatic Rust best practices
+- **Comprehensive Testing**: Add unit, integration, and property tests for new features
+- **Documentation**: Use `///` doc comments with runnable examples where possible
 - **Testing**: 90%+ code coverage with unit and integration tests
 - **Security**: Security review for all new features
 
@@ -742,10 +767,10 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE.m
 ### **Getting Help**
 
 - **📚 Documentation**: Comprehensive guides and API references
-- **💬 Discord Community**: Join our [Discord server](https://discord.gg/gordon-gekko)
+- **💬 Discord Community**: Join our [Discord server](https://discord.gg/ninja-gekko)
 - **📧 Email Support**: support@gordongekko.ai
-- **🐛 Bug Reports**: [GitHub Issues](https://github.com/your-org/gordon-gekko/issues)
-- **💡 Feature Requests**: [GitHub Discussions](https://github.com/your-org/gordon-gekko/discussions)
+- **🐛 Bug Reports**: [GitHub Issues](https://github.com/your-org/ninja-gekko/issues)
+- **💡 Feature Requests**: [GitHub Discussions](https://github.com/your-org/ninja-gekko/discussions)
 
 ### **Professional Services**
 
@@ -757,8 +782,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE.m
 ### **Contact Information**
 
 ```
-Gordon Gekko Autonomous Trading
-📧 Email: contact@gordongekko.ai
+Ninja Gekko Autonomous Trading
+📧 Email: contact@ninjagekko.ai
 🌐 Website: https://gordongekko.ai
 📍 Location: Distributed Global Team
 
@@ -793,17 +818,17 @@ Security Issues: security@gordongekko.ai
 
 ## 🌟 **Experience the Future of Algorithmic Trading**
 
-**Gordon Gekko** represents the next evolution in autonomous trading technology. With enterprise-grade security, advanced AI capabilities, and institutional-quality performance, it's the complete solution for sophisticated trading operations.
+**Ninja Gekko** represents the next evolution in autonomous trading technology. With enterprise-grade security, advanced AI capabilities, and institutional-quality performance, it's the complete solution for sophisticated trading operations.
 
 ---
 
 **🚀 Ready to transform your trading? Get started today!**
 
-[📖 Documentation](#-documentation) • [🚀 Quick Start](#-quick-start) • [💬 Community](https://discord.gg/gordon-gekko) • [📧 Contact Us](mailto:contact@gordongekko.ai)
+[📖 Documentation](#-documentation) • [🚀 Quick Start](#-quick-start) • [💬 Community](https://discord.gg/ninja-gekko) • [📧 Contact Us](mailto:contact@ninjagekko.ai)
 
 ---
 
-**Built with ❤️ by the Gordon Gekko Team**
+**Built with ❤️ by the Ninja Gekko Team**
 
 *Empowering Financial Markets with Intelligent Automation*
 

@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod supabase_tests {
     use super::*;
-    use gordon_gekko_database::supabase::*;
-    use gordon_gekko_database::config::*;
+    use ninja_gekko_database::supabase::*;
+    use ninja_gekko_database::config::*;
     use std::collections::HashMap;
     use tokio::time::timeout;
 
@@ -195,7 +195,7 @@ mod supabase_tests {
                 // Wait for all connections to complete
                 let mut results = vec![];
                 for handle in handles {
-                    results.push(handle.await.unwrap_or(Err(gordon_gekko_database::error::DatabaseError::ConnectionError("timeout".to_string()))));
+                    results.push(handle.await.unwrap_or(Err(ninja_gekko_database::error::DatabaseError::ConnectionError("timeout".to_string()))));
                 }
 
                 // At least some connections should work or fail consistently

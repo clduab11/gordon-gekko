@@ -1,4 +1,4 @@
-//! # Gordon Gekko Core
+//! # Ninja Gekko Core
 //!
 //! Core types, error handling, and trading system orchestration for the
 //! autonomous trading platform. This crate provides the fundamental building

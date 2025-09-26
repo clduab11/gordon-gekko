@@ -28,14 +28,14 @@ pub async fn health_check() -> Json<serde_json::Value> {
     Json(json!({
         "status": "healthy",
         "timestamp": chrono::Utc::now(),
-        "service": "gordon-gekko-api"
+        "service": "ninja-gekko-api"
     }))
 }
 
 /// Handler for the root API information endpoint
 pub async fn api_info() -> Json<serde_json::Value> {
     Json(json!({
-        "name": "Gordon Gekko Trading API",
+        "name": "Ninja Gekko Trading API",
         "version": "1.0.0",
         "description": "High-performance REST API for autonomous trading",
         "endpoints": {
