@@ -86,3 +86,5 @@ secrets/
 data/
 models/
 checkpoints/
+node_modules/
+frontend/chat-ui/node_modules/

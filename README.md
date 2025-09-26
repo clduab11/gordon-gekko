@@ -290,9 +290,10 @@ Native Model Context Protocol integration with 70+ servers:
     ```
 
 7. **Access the System**
-    - **Web Interface**: http://localhost:8080
+    - **Chat Orchestration API**: http://localhost:8787/health
+    - **Talk to Gordon UI (dev)**: http://localhost:5173 (run `pnpm install && pnpm dev --filter ninja-gekko-chat-ui` inside `frontend/chat-ui`)
     - **API Documentation**: http://localhost:8080/docs
-    - **Health Check**: http://localhost:8080/health
+    - **Legacy Health Check**: http://localhost:8080/health
 
 ### **Basic Configuration**
 

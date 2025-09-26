@@ -4,9 +4,11 @@
 
 use anyhow::Result;
 use clap::Parser;
-use std::sync::Arc;
+use std::net::SocketAddr;
 use tokio::signal;
 use tracing::{error, info, warn};
+
+mod web;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -56,6 +58,10 @@ async fn main() -> Result<()> {
     // Create trading system - placeholder implementation
     info!("✅ Ninja Gekko initialized");
 
+    let api_addr: SocketAddr = "0.0.0.0:8787".parse()?;
+    let api_handle = web::spawn(api_addr);
+    info!("🌐 Chat orchestration API live at http://{api_addr}");
+
     // Setup graceful shutdown
     let shutdown_handle = setup_shutdown_handler();
 
@@ -67,6 +73,8 @@ async fn main() -> Result<()> {
 
     // Wait for shutdown signal or completion
     shutdown_handle.await;
+
+    api_handle.abort();
 
     // Perform cleanup
     info!("🛑 Shutting down Ninja Gekko...");
