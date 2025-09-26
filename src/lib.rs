@@ -30,7 +30,11 @@
 //!     let bot = NinjaGekko::builder()
 //!         .mode(OperationMode::Precision)
 //!         .neural_backend(NeuralBackend::RuvFann)
-//!         .mcp_servers(vec!["playwright", "filesystem", "github"])
+//!         .mcp_servers(vec![
+//!             "playwright".to_string(),
+//!             "filesystem".to_string(),
+//!             "github".to_string(),
+//!         ])
 //!         .build()
 //!         .await?;
 //!     

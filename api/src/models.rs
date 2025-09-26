@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use gordon_gekko_core::types::{Order, OrderSide, OrderStatus, OrderType, Position, Portfolio};
+use ninja_gekko_core::types::{Order, OrderSide, OrderStatus, OrderType, Position, Portfolio};
 use std::collections::HashMap;
 
 /// Standardized API response wrapper

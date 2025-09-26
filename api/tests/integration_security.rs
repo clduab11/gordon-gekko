@@ -13,7 +13,7 @@
   13 | use axum::response::Response;
   14 | use axum_extra::extract::CookieJar;
   15 | use chrono::{DateTime, Utc};
-  16 | use gordon_gekko_api::{
+  16 | use ninja_gekko_api::{
   17 |     auth_validation::{AuthValidator, AuthContext, AuthorizationLevel, AuthMiddleware, JwtConfig},
   18 |     env_validation::{EnvironmentValidator, SecureConfig, DatabaseConfig, JwtSecureConfig, ApiSecureConfig},
   19 |     middleware::{security, rate_limit, cors, logging, utils},
@@ -181,7 +181,7 @@
  181 |             timestamp: chrono::Utc::now(),
  182 |         };
  183 | 
- 184 |         let rate_validator = gordon_gekko_api::validation::RateLimitValidator::new();
+ 184 |         let rate_validator = ninja_gekko_api::validation::RateLimitValidator::new();
  185 |         let rate_check = rate_validator.check_rate_limit(&rate_context);
  186 |         assert!(rate_check.is_ok(), "Rate limit check should pass for valid context");
  187 | 
@@ -369,7 +369,7 @@
  369 |             timestamp: chrono::Utc::now(),
  370 |         };
  371 
- 372 |         let rate_validator = gordon_gekko_api::validation::RateLimitValidator::new();
+ 372 |         let rate_validator = ninja_gekko_api::validation::RateLimitValidator::new();
  373 |         let rate_result = rate_validator.check_rate_limit(&rate_context);
  374 |         assert!(rate_result.is_ok());
  375 

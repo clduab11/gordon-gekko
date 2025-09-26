@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod cache_tests {
     use super::*;
-    use gordon_gekko_database::cache::*;
-    use gordon_gekko_database::config::*;
+    use ninja_gekko_database::cache::*;
+    use ninja_gekko_database::config::*;
     use std::time::Duration;
     use tokio::time::timeout;
 

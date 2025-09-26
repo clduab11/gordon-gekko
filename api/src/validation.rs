@@ -1,7 +1,7 @@
 //! Comprehensive security validation layer
 //!
 //! This module provides centralized input validation, sanitization,
-//! and security checks for the Gordon Gekko API server. It implements
+//! and security checks for the Ninja Gekko API server. It implements
 //! defense-in-depth strategies to prevent common vulnerabilities.
 
 use serde::{Deserialize, Serialize};

@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-**Ninja Gekko** is a next-generation autonomous trading bot built in Rust with native MCP (Model Context Protocol) integration. This project represents the evolution from the original Gordon Gekko Python implementation to a high-performance, memory-safe, completely autonomous trading system.
+**Ninja Gekko** is a next-generation autonomous trading bot built in Rust with native MCP (Model Context Protocol) integration. This project represents the evolution from the original Ninja Gekko prototype to a high-performance, memory-safe, completely autonomous trading system.
 
 ## Core Architecture
 
 ### Technology Stack
-- **Primary Language**: Rust (transitioning from Python)
+- **Primary Language**: Rust
 - **Neural Networks**: ruv-FANN (Rust-based FANN implementation)
 - **Swarm Intelligence**: flow-nexus integration
 - **Protocols**: Native MCP support with 70+ server integrations

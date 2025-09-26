@@ -1,4 +1,4 @@
-//! HTTP request handlers for the Gordon Gekko API
+//! HTTP request handlers for the Ninja Gekko API
 //!
 //! This module contains all the HTTP endpoint handlers organized by functionality:
 //! - Authentication utilities (login, logout, token refresh)
@@ -43,7 +43,7 @@ pub async fn health_check() -> Json<serde_json::Value> {
         "status": "healthy",
         "timestamp": chrono::Utc::now().to_rfc3339(),
         "version": env!("CARGO_PKG_VERSION"),
-        "service": "gordon-gekko-api"
+        "service": "ninja-gekko-api"
     }))
 }
 
@@ -53,7 +53,7 @@ pub async fn health_check() -> Json<serde_json::Value> {
 /// version information, and supported features.
 pub async fn api_info() -> Json<ApiResponse<serde_json::Value>> {
     let info = json!({
-        "name": "Gordon Gekko Trading API",
+        "name": "Ninja Gekko Trading API",
         "version": env!("CARGO_PKG_VERSION"),
         "description": "High-performance REST API for autonomous trading operations",
         "endpoints": {

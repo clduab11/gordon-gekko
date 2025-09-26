@@ -1,15 +1,15 @@
 [package]
-name = "gordon-gekko-api"
+name = "ninja-gekko-api"
 version = "0.1.0"
 edition = "2021"
-description = "High-performance REST API and WebSocket server for Gordon Gekko trading system"
+description = "High-performance REST API and WebSocket server for the Ninja Gekko trading system"
 keywords = ["trading", "api", "websocket", "axum", "rest"]
 categories = ["api-bindings", "web-programming", "finance"]
 
 [dependencies]
 # Core dependencies
-gordon-gekko-core = { path = "../core" }
-gordon-gekko-database = { path = "../database" }
+ninja-gekko-core = { path = "../core" }
+ninja-gekko-database = { path = "../database" }
 
 # Axum web framework
 axum = { version = "0.7", features = ["ws", "macros", "tracing"] }

@@ -1,2 +1,0 @@
-[console_scripts]
-gordon-gekko = gordon_gekko.cli.main:main

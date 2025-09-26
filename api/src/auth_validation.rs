@@ -1,7 +1,7 @@
 //! Centralized authentication and authorization validation
 //!
 //! This module provides comprehensive JWT validation, authorization checks,
-//! and secure authentication middleware for the Gordon Gekko API.
+//! and secure authentication middleware for the Ninja Gekko API.
 
 use serde::{Deserialize, Serialize};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Algorithm, Validation, TokenData};
@@ -58,8 +58,8 @@ impl Default for JwtConfig {
             }),
             expiration: 3600, // 1 hour
             refresh_expiration: 86400 * 7, // 7 days
-            issuer: "gordon-gekko-api".to_string(),
-            audience: "gordon-gekko-client".to_string(),
+            issuer: "ninja-gekko-api".to_string(),
+            audience: "ninja-gekko-client".to_string(),
         }
     }
 }
@@ -418,7 +418,7 @@ mod tests {
         let config = JwtConfig::default();
         assert_eq!(config.expiration, 3600);
         assert_eq!(config.refresh_expiration, 86400 * 7);
-        assert_eq!(config.issuer, "gordon-gekko-api");
+        assert_eq!(config.issuer, "ninja-gekko-api");
     }
 
     #[test]

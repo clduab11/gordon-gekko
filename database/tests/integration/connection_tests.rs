@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod connection_tests {
     use super::*;
-    use gordon_gekko_database::connection::*;
-    use gordon_gekko_database::config::*;
+    use ninja_gekko_database::connection::*;
+    use ninja_gekko_database::config::*;
     use std::sync::Arc;
     use tokio::sync::Mutex;
     use std::time::Duration;
@@ -156,7 +156,7 @@ mod connection_tests {
                 // Test retry logic with exponential backoff
                 let retry_result = manager.execute_with_retry(|| async {
                     // Simulate a query that might fail
-                    Ok::<String, gordon_gekko_database::error::DatabaseError>("retry_test".to_string())
+                    Ok::<String, ninja_gekko_database::error::DatabaseError>("retry_test".to_string())
                 }).await;
 
                 // Retry should either succeed or fail gracefully

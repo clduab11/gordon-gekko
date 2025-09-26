@@ -1,6 +1,6 @@
-//! # Gordon Gekko API
+//! # Ninja Gekko API
 //!
-//! High-performance REST API and WebSocket server for the Gordon Gekko trading system.
+//! High-performance REST API and WebSocket server for the Ninja Gekko trading system.
 //! Built with Axum framework for maximum performance and reliability.
 //!
 //! ## Features
@@ -36,8 +36,8 @@ use tower_http::cors::{CorsLayer, Any};
 use tracing::{info, error, warn};
 
 // Core dependencies
-use gordon_gekko_core::{Order, Position, Portfolio, MarketData, OrderType, OrderSide};
-use gordon_gekko_database::{DatabaseManager, TradeRepository, PortfolioRepository};
+use ninja_gekko_core::{Order, Position, Portfolio, MarketData, OrderType, OrderSide};
+use ninja_gekko_database::{DatabaseManager, TradeRepository, PortfolioRepository};
 
 pub mod config;
 pub mod handlers;
@@ -180,7 +180,7 @@ impl ApiServer {
     pub async fn serve(self) -> Result<(), error::ApiError> {
         let addr = &self.config.bind_address;
 
-        info!("Starting Gordon Gekko API server on {}", addr);
+        info!("Starting Ninja Gekko API server on {}", addr);
         info!("Health check available at http://{}/health", addr);
         info!("API documentation available at http://{}/api/v1/docs", addr);
 
@@ -219,7 +219,7 @@ fn count_routes(router: &Router) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gordon_gekko_core::types::{OrderId, Symbol, AccountId};
+    use ninja_gekko_core::types::{OrderId, Symbol, AccountId};
 
     #[tokio::test]
     async fn test_api_server_creation() {

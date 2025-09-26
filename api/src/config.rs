@@ -1,6 +1,6 @@
 //! API Configuration Module
 //!
-//! Handles configuration loading and management for the Gordon Gekko API server.
+//! Handles configuration loading and management for the Ninja Gekko API server.
 //! Supports environment variables, configuration files, and runtime configuration.
 
 use serde::{Deserialize, Serialize};

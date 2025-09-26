@@ -13,7 +13,7 @@ use std::sync::Arc;
 use serde_json::json;
 use tracing::{info, warn, error};
 
-use gordon_gekko_core::types::{Order, OrderSide, OrderType, OrderStatus};
+use ninja_gekko_core::types::{Order, OrderSide, OrderType, OrderStatus};
 use crate::{
     error::{ApiError, ApiResult},
     models::{

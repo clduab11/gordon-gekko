@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod migration_tests {
     use super::*;
-    use gordon_gekko_database::migrations::*;
-    use gordon_gekko_database::config::*;
+    use ninja_gekko_database::migrations::*;
+    use ninja_gekko_database::config::*;
     use std::path::PathBuf;
     use tempfile::TempDir;
     use tokio::fs;
@@ -169,7 +169,7 @@ mod migration_tests {
                 // Wait for all validation attempts
                 let mut results = vec![];
                 for handle in handles {
-                    results.push(handle.await.unwrap_or(Err(gordon_gekko_database::error::DatabaseError::MigrationError("timeout".to_string()))));
+                    results.push(handle.await.unwrap_or(Err(ninja_gekko_database::error::DatabaseError::MigrationError("timeout".to_string()))));
                 }
 
                 // Some validations should succeed
