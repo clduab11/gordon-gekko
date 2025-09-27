@@ -1,5 +1,8 @@
 //! MCP (Model Context Protocol) integration for Ninja Gekko
 
+/// Tenno-MCP module providing system access utilities.
+pub mod mcp_admin;
+
 use std::collections::HashMap;
 use tracing::{info, warn, error};
 
