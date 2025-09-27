@@ -267,7 +267,7 @@ impl VolatilityScanner {
         let mid_price = (market_data.ask + market_data.bid) / Decimal::new(2, 0);
         
         if mid_price > Decimal::ZERO {
-            let spread_percentage = (spread / mid_price).to_string().parse().unwrap_or(1.0);
+            let spread_percentage: f64 = (spread / mid_price).to_string().parse().unwrap_or(1.0);
             // Invert so tighter spreads get higher scores (max 1.0)
             (1.0 - spread_percentage.min(1.0)).max(0.0)
         } else {

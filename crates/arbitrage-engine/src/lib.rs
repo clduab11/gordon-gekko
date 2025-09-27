@@ -52,6 +52,9 @@ pub enum ArbitrageError {
     #[error("Neural engine error: {0}")]
     NeuralEngine(String),
     
+    #[error("Task join error: {0}")]
+    TaskJoin(String),
+    
     #[error("Configuration error: {0}")]
     Configuration(String),
 }
@@ -277,12 +280,15 @@ impl ArbitrageEngine {
         info!("💀 Max risk score: {}", self.config.max_risk_score);
 
         // Join all handles (this would run indefinitely)
-        tokio::try_join!(
+        match tokio::try_join!(
             scanner_handle,
             detection_handle,
             allocation_handle,
             monitoring_handle
-        )?;
+        ) {
+            Ok(_) => {},
+            Err(e) => return Err(ArbitrageError::TaskJoin(e.to_string())),
+        }
 
         Ok(())
     }

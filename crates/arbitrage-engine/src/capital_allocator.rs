@@ -87,7 +87,7 @@ impl CapitalAllocator {
             id: Uuid::new_v4(),
             from_exchange,
             to_exchange,
-            currency,
+            currency: currency.clone(),
             amount,
             priority,
             reason,
@@ -105,9 +105,10 @@ impl CapitalAllocator {
               amount, currency, from_exchange, to_exchange, priority);
 
         let mut pending = self.pending_allocations.write().await;
-        pending.insert(request.id, request);
+        let request_id = request.id;
+        pending.insert(request_id, request);
 
-        Ok(request.id)
+        Ok(request_id)
     }
 
     /// Process pending allocations and execute transfers

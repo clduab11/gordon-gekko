@@ -114,6 +114,11 @@ serde = { workspace = true }
 uuid = { workspace = true }
 once_cell = { workspace = true }
 parking_lot = { workspace = true }
+rust_decimal = { workspace = true }
+
+# Exchange connectors and arbitrage engine
+exchange-connectors = { path = "crates/exchange-connectors" }
+arbitrage-engine = { path = "crates/arbitrage-engine" }
 
 # HTTP API surface for the chat UI
 axum = { version = "0.7", features = ["macros"] }

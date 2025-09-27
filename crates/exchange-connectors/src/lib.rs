@@ -50,7 +50,7 @@ pub enum ExchangeError {
 pub type ExchangeResult<T> = Result<T, ExchangeError>;
 
 /// Unique identifiers for exchanges
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExchangeId {
     Coinbase,
     BinanceUs,

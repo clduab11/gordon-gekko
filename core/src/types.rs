@@ -10,6 +10,16 @@ use std::collections::HashMap;
 /// including orders, positions, executions, and market data structures.
 use crate::error::{TradingError, TradingResult};
 
+// Re-export arbitrage types for integration
+pub use arbitrage_engine::{
+    ArbitrageOpportunity, VolatilityScore, AllocationRequest, AllocationPriority,
+    ArbitrageConfig, TimeSensitivity, ExecutionComplexity
+};
+
+pub use exchange_connectors::{
+    ExchangeId, TransferRequest, TransferUrgency, TransferStatus
+};
+
 /// Unique identifier for trading entities
 pub type OrderId = Uuid;
 pub type ExecutionId = Uuid;
