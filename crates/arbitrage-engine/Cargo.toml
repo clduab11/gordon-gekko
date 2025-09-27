@@ -1,0 +1,41 @@
+[package]
+name = "arbitrage-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Gordon Gekko-inspired arbitrage engine for aggressive cross-exchange trading"
+
+[dependencies]
+# Core async runtime
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Trading dependencies
+exchange-connectors = { path = "../exchange-connectors" }
+trading-core = { path = "../trading-core" }
+neural-engine = { path = "../neural-engine" }
+
+# Data structures and math
+rust_decimal = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling and logging
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+
+# Statistics and analysis
+statrs = "0.17"
+ndarray = { workspace = true }
+
+# Async utilities
+tokio-util = { workspace = true }
+futures-util = { workspace = true }
+
+# Collections
+dashmap = { workspace = true }
+indexmap = "2.6"

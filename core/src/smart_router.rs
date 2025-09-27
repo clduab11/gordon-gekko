@@ -4,7 +4,8 @@ use tokio::sync::RwLock;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
-use crate::types::{TradingPlatform, MarketData, Order, OrderId, Execution, Symbol, AccountId};
+use crate::types::{TradingPlatform, MarketData, Order, OrderId, Execution, Symbol, AccountId,
+                   ArbitrageOpportunity, VolatilityScore};
 use crate::error::{TradingError, TradingResult};
 
 /// Smart Order Router for optimal venue selection and execution.
@@ -319,20 +320,43 @@ pub struct ExecutionResult {
     pub alternatives: Vec<(String, Decimal)>,
 }
 
+/// Result of arbitrage opportunity routing
+#[derive(Debug, Clone)]
+pub struct ArbitrageExecutionPlan {
+    pub opportunity_id: uuid::Uuid,
+    pub buy_platform: TradingPlatform,
+    pub sell_platform: TradingPlatform,
+    pub execution_size: Decimal,
+    pub estimated_profit: Decimal,
+    pub risk_score: f64,
+    pub execution_deadline: chrono::DateTime<chrono::Utc>,
+    pub contingency_plans: Vec<ContingencyPlan>,
+}
+
+/// Result of arbitrage opportunity routing
+#[derive(Debug, Clone)]
+pub struct ArbitrageExecutionPlan {
+    pub opportunity_id: uuid::Uuid,
+    pub buy_platform: TradingPlatform,
+    pub sell_platform: TradingPlatform,
+    pub execution_size: Decimal,
+    pub estimated_profit: Decimal,
+    pub risk_score: f64,
+    pub execution_deadline: chrono::DateTime<chrono::Utc>,
+    pub contingency_plans: Vec<ContingencyPlan>,
+}
+
+/// Contingency plan for arbitrage execution
+#[derive(Debug, Clone)]
+pub struct ContingencyPlan {
+    pub trigger_condition: String,
+    pub alternative_action: String,
+    pub fallback_platforms: Vec<TradingPlatform>,
+}
+
 /// Platform scoring components
 #[derive(Debug, Clone, Default)]
 pub struct PlatformScoreComponents {
-    /// Liquidity score (0-1)
-    pub liquidity_score: Decimal,
-
-    /// Cost efficiency score (0-1)
-    pub cost_score: Decimal,
-
-    /// Execution speed score (0-1)
-    pub speed_score: Decimal,
-
-    /// Reliability score (0-1)
-    pub reliability_score: Decimal,
 }
 
 impl PlatformScoreComponents {

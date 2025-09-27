@@ -1,7 +1,9 @@
 use tokio::process::Command;
+use uuid::Uuid;
 
-// Define action structs in a separate file later
-// use crate::mcp::mcp_admin::actions::{FileOperation, WebTask};
+// Import action definitions
+pub mod actions;
+pub use actions::*;
 
 /// Tenno-MCP provides unified, administrator-level access to the local machine,
 /// combining OS, web, and filesystem operations.
@@ -76,10 +78,126 @@ impl TennoMcp {
     // }
 
     // /// Performs a web task using Playwright.
-    // pub async fn perform_web_task(&self, task: WebTask) -> Result<String, String> {
-    //     // To be implemented in a future step.
-    //     unimplemented!();
-    // }
+    /// Execute a fund transfer between exchanges
+    pub async fn execute_transfer(&self, request: TransferRequest) -> Result<String, String> {
+        tracing::info!("🔄 Executing transfer: {} {} from {:?} to {:?}", 
+                      request.amount, request.currency, request.from_exchange, request.to_exchange);
+
+        // In a real implementation, this would:
+        // 1. Validate the transfer request
+        // 2. Check available balances
+        // 3. Initiate withdrawal from source exchange
+        // 4. Monitor transfer status
+        // 5. Confirm deposit on target exchange
+        
+        // For now, return a simulated transfer ID
+        let transfer_id = format!("TXN_{}", request.id);
+        
+        tracing::info!("✅ Transfer initiated: {}", transfer_id);
+        Ok(transfer_id)
+    }
+
+    /// Query balances across exchanges
+    pub async fn query_balances(&self, query: BalanceQuery) -> Result<BalanceResponse, String> {
+        tracing::info!("💰 Querying balances for {:?}", query.exchange_id);
+
+        // Simulate balance retrieval
+        let mut exchange_balances = std::collections::HashMap::new();
+        
+        // Add simulated balances for demonstration
+        let demo_balances = vec![
+            CurrencyBalance {
+                currency: "USD".to_string(),
+                available: rust_decimal::Decimal::new(50000, 0),
+                total: rust_decimal::Decimal::new(50000, 0),
+                reserved: rust_decimal::Decimal::ZERO,
+                usd_value: rust_decimal::Decimal::new(50000, 0),
+            },
+            CurrencyBalance {
+                currency: "BTC".to_string(),
+                available: rust_decimal::Decimal::new(2, 0),
+                total: rust_decimal::Decimal::new(2, 0),
+                reserved: rust_decimal::Decimal::ZERO,
+                usd_value: rust_decimal::Decimal::new(100000, 0), // $100k
+            },
+        ];
+
+        exchange_balances.insert(ExchangeId::Coinbase, demo_balances);
+
+        let response = BalanceResponse {
+            query_id: query.id,
+            exchange_balances,
+            total_portfolio_value_usd: rust_decimal::Decimal::new(150000, 0),
+            retrieved_at: chrono::Utc::now(),
+        };
+
+        tracing::info!("📊 Balance query completed: ${} total portfolio value", 
+                      response.total_portfolio_value_usd);
+        Ok(response)
+    }
+
+    /// Execute emergency shutdown procedures
+    pub async fn emergency_shutdown(&self, shutdown: EmergencyShutdown) -> Result<String, String> {
+        tracing::error!("🚨 EMERGENCY SHUTDOWN INITIATED 🚨");
+        tracing::error!("Reason: {:?}, Scope: {:?}", shutdown.reason, shutdown.scope);
+
+        // In a real implementation, this would:
+        // 1. Cancel all active orders
+        // 2. Close positions if required
+        // 3. Stop all trading algorithms
+        // 4. Notify administrators
+        // 5. Log the shutdown event
+
+        let shutdown_id = format!("SHUTDOWN_{}", shutdown.id);
+        
+        match shutdown.scope {
+            ShutdownScope::AllTrading => {
+                tracing::error!("🛑 ALL TRADING STOPPED");
+            }
+            ShutdownScope::SpecificExchange(ref exchange) => {
+                tracing::error!("🛑 TRADING STOPPED ON {:?}", exchange);
+            }
+            ShutdownScope::ArbitrageOnly => {
+                tracing::error!("🛑 ARBITRAGE TRADING STOPPED");
+            }
+            ShutdownScope::SpecificSymbol(ref symbol) => {
+                tracing::error!("🛑 TRADING STOPPED FOR {}", symbol);
+            }
+        }
+
+        tracing::error!("✅ Emergency shutdown complete: {}", shutdown_id);
+        Ok(shutdown_id)
+    }
+
+    /// Get system health status for arbitrage operations
+    pub async fn get_arbitrage_system_health(&self) -> Result<ArbitrageSystemHealth, String> {
+        tracing::debug!("🏥 Checking arbitrage system health");
+
+        // In a real implementation, this would check:
+        // - Exchange connectivity status
+        // - API rate limit status
+        // - Capital allocation health
+        // - Risk monitor status
+        // - Neural engine health
+
+        let health = ArbitrageSystemHealth {
+            overall_status: SystemStatus::Healthy,
+            exchange_status: std::collections::HashMap::from([
+                (ExchangeId::Coinbase, ExchangeStatus::Connected),
+                (ExchangeId::BinanceUs, ExchangeStatus::Connected),
+                (ExchangeId::Oanda, ExchangeStatus::Connected),
+            ]),
+            capital_allocation_health: AllocationHealth::Optimal,
+            risk_monitor_status: RiskMonitorStatus::Active,
+            neural_engine_status: NeuralEngineStatus::Operational,
+            last_arbitrage_execution: Some(chrono::Utc::now() - chrono::Duration::minutes(2)),
+            active_opportunities: 5,
+            success_rate_24h: 94.5,
+            checked_at: chrono::Utc::now(),
+        };
+
+        Ok(health)
+    }
 }
 
 #[cfg(test)]

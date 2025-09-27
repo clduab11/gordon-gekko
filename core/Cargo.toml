@@ -21,3 +21,7 @@ parking_lot = { workspace = true }
 
 # Configuration
 config = { workspace = true }
+
+# Arbitrage engine integration
+arbitrage-engine = { path = "../crates/arbitrage-engine" }
+exchange-connectors = { path = "../crates/exchange-connectors" }

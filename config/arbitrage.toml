@@ -1,0 +1,176 @@
+# Gordon Gekko Arbitrage Configuration
+# Configuration file for the aggressive arbitrage trading system
+
+[arbitrage]
+# Enable Gordon Gekko "greed is good" mode
+gekko_mode = true
+
+# Allocation aggressiveness (0.0 to 1.0) - 0.9 = maximum aggression
+allocation_aggressiveness = 0.9
+
+# Minimum profit percentage to consider (e.g., 0.05 = 0.05%)
+min_profit_percentage = 0.05
+
+# Maximum risk score to accept (0.0 to 1.0)
+max_risk_score = 0.7
+
+# Minimum confidence score required (0.0 to 1.0)
+min_confidence_score = 0.85
+
+# Maximum position size per opportunity (USD)
+max_position_size = 50_000
+
+# Maximum daily capital allocation (USD)
+max_daily_allocation = 1_000_000
+
+# Target return multipliers (5:1 to 20:1 as specified)
+target_return_min = 5.0
+target_return_max = 20.0
+
+# Volatility scanning frequency in milliseconds
+scan_frequency_ms = 100
+
+[exchanges]
+# Coinbase Pro/Advanced Trade API
+[exchanges.coinbase]
+enabled = true
+api_key = "${COINBASE_API_KEY}"
+api_secret = "${COINBASE_API_SECRET}"
+api_passphrase = "${COINBASE_API_PASSPHRASE}"
+sandbox = false
+base_url = "https://api.exchange.coinbase.com"
+websocket_url = "wss://ws-feed.exchange.coinbase.com"
+rate_limit_requests_per_second = 10
+rate_limit_burst = 15
+
+# Binance.us API
+[exchanges.binance_us]
+enabled = true
+api_key = "${BINANCE_US_API_KEY}"
+api_secret = "${BINANCE_US_API_SECRET}"
+sandbox = false
+base_url = "https://api.binance.us"
+websocket_url = "wss://stream.binance.us:9443"
+rate_limit_requests_per_second = 20
+rate_limit_burst = 30
+
+# OANDA v20 REST API
+[exchanges.oanda]
+enabled = true
+api_key = "${OANDA_API_KEY}"
+account_id = "${OANDA_ACCOUNT_ID}"
+sandbox = false
+base_url = "https://api-fxtrade.oanda.com"
+stream_url = "https://stream-fxtrade.oanda.com"
+rate_limit_requests_per_second = 30
+rate_limit_burst = 50
+
+[risk_management]
+# Maximum daily loss threshold (USD)
+max_daily_loss = 5_000
+
+# Maximum consecutive losses before circuit breaker
+max_consecutive_losses = 5
+
+# Maximum position exposure as percentage of total capital
+max_position_exposure_percent = 15.0
+
+# Value at Risk (VaR) confidence level
+var_confidence_level = 0.99
+
+# Stop loss threshold as percentage
+stop_loss_threshold_percent = 2.0
+
+# Emergency shutdown triggers
+emergency_shutdown_on_exchange_disconnect = true
+emergency_shutdown_on_api_errors = 10  # Number of consecutive API errors
+
+[strategy]
+# Strategy parameters for different market conditions
+[strategy.high_volatility]
+scan_frequency_ms = 50
+min_profit_percentage = 0.03
+allocation_aggressiveness = 0.95
+max_position_size = 75_000
+
+[strategy.normal_volatility]
+scan_frequency_ms = 100
+min_profit_percentage = 0.05
+allocation_aggressiveness = 0.8
+max_position_size = 50_000
+
+[strategy.low_volatility]
+scan_frequency_ms = 200
+min_profit_percentage = 0.08
+allocation_aggressiveness = 0.6
+max_position_size = 25_000
+
+[operational]
+# Logging configuration
+log_level = "info"
+log_to_file = true
+log_file_path = "logs/arbitrage.log"
+log_max_file_size = "100MB"
+log_max_files = 10
+
+# Performance monitoring
+enable_performance_monitoring = true
+performance_report_interval_seconds = 60
+enable_real_time_alerts = true
+
+# WebSocket streaming
+enable_websocket_streaming = true
+websocket_port = 8080
+max_websocket_connections = 1000
+
+# Database configuration
+database_url = "${DATABASE_URL}"
+database_pool_size = 20
+database_timeout_seconds = 30
+
+[monitoring]
+# Prometheus metrics
+enable_prometheus = true
+prometheus_port = 9090
+
+# Health check endpoints
+enable_health_checks = true
+health_check_interval_seconds = 30
+
+# Alert thresholds
+alert_on_success_rate_below = 80.0  # Alert if success rate drops below 80%
+alert_on_drawdown_above = 2.0       # Alert if drawdown exceeds 2%
+alert_on_profit_below_target = true  # Alert if not meeting profit targets
+
+[emergency]
+# Emergency contact information
+emergency_contacts = [
+    "admin@ninja-gekko.com",
+    "risk@ninja-gekko.com"
+]
+
+# Emergency actions
+emergency_auto_shutdown = true
+emergency_notify_contacts = true
+emergency_save_state = true
+
+# Emergency thresholds
+emergency_loss_threshold = 10_000    # USD
+emergency_error_rate_threshold = 25.0  # Percentage
+
+[neural_engine]
+# Neural engine configuration for AI-powered predictions
+model_update_frequency_hours = 6
+enable_real_time_inference = true
+inference_timeout_ms = 100
+model_accuracy_threshold = 0.85
+
+# Model paths
+volatility_model_path = "models/volatility_predictor.bin"
+arbitrage_model_path = "models/arbitrage_detector.bin"
+risk_model_path = "models/risk_assessor.bin"
+
+# Training configuration
+auto_retrain_on_performance_drop = true
+retrain_accuracy_threshold = 0.8
+training_data_retention_days = 30
