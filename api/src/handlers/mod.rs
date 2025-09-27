@@ -26,6 +26,7 @@ pub mod trades;
 pub mod portfolio;
 pub mod market_data;
 pub mod strategies;
+pub mod arbitrage;
 
 // Re-export all handler functions
 pub use auth_utils::{login_handler, refresh_handler, logout_handler};
@@ -33,6 +34,11 @@ pub use trades::{list_trades, create_trade, get_trade, update_trade, delete_trad
 pub use portfolio::{get_portfolio, get_positions, get_position, get_performance};
 pub use market_data::{get_market_data, get_symbol_data, get_price_history};
 pub use strategies::{list_strategies, create_strategy, get_strategy, update_strategy, delete_strategy, execute_strategy};
+pub use arbitrage::{
+    start_arbitrage_strategy, stop_arbitrage_strategy, get_arbitrage_opportunities,
+    get_volatility_scores, get_arbitrage_performance, get_balance_distribution,
+    emergency_capital_reallocation
+};
 
 /// Health check endpoint
 ///
