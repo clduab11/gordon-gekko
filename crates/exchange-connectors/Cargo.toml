@@ -1,0 +1,44 @@
+[package]
+name = "exchange-connectors"
+version = "0.1.0"
+edition = "2021"
+description = "Exchange connectors for Coinbase, Binance.us, and OANDA"
+
+[dependencies]
+# Core async runtime
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Trading types from core
+trading-core = { path = "../trading-core" }
+
+# HTTP and WebSocket
+reqwest = { workspace = true }
+tokio-tungstenite = "0.21"
+url = "2.5"
+
+# JSON and serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Time and decimal handling
+chrono = { workspace = true }
+rust_decimal = { workspace = true }
+uuid = { workspace = true }
+
+# Error handling and logging
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+
+# Cryptography for API signatures
+hmac = "0.12"
+sha2 = "0.10"
+base64 = "0.22"
+
+# Rate limiting
+tokio-util = { version = "0.7", features = ["time"] }
+governor = "0.6"
+
+# WebSocket helpers
+futures-util = "0.3"
