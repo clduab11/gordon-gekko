@@ -2,6 +2,9 @@
 
 # 🥷 Ninja Gekko Autonomous Trading Agent
 
+<img width="1024" height="1536" alt="20250928_1331_Reptilian Corporate Predator_remix_01k68scrr6fbsa6b237xrsg4sg" src="https://github.com/user-attachments/assets/f1514681-e32b-4332-9a2f-72ea8ffcb096" />
+
+
 **The Ultimate Rust-Powered Autonomous Trading Bot with Advanced MCP Intelligence**
 
 [![Rust](https://img.shields.io/badge/rust-1.80+-orange.svg)](https://www.rust-lang.org)
