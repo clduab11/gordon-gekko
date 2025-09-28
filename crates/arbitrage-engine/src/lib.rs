@@ -21,40 +21,43 @@ use tokio::sync::{mpsc, RwLock};
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
-pub mod volatility_scanner;
 pub mod capital_allocator;
-pub mod opportunity_detector;
 pub mod execution_engine;
+pub mod opportunity_detector;
+pub mod volatility_scanner;
 
-pub use volatility_scanner::VolatilityScanner;
 pub use capital_allocator::CapitalAllocator;
-pub use opportunity_detector::OpportunityDetector;
 pub use execution_engine::ExecutionEngine;
+pub use opportunity_detector::OpportunityDetector;
+pub use volatility_scanner::VolatilityScanner;
 
 /// Arbitrage engine error types
 #[derive(Error, Debug)]
 pub enum ArbitrageError {
     #[error("Exchange error: {0}")]
     Exchange(String),
-    
+
     #[error("Insufficient capital: required {required}, available {available}")]
-    InsufficientCapital { required: Decimal, available: Decimal },
-    
+    InsufficientCapital {
+        required: Decimal,
+        available: Decimal,
+    },
+
     #[error("No arbitrage opportunities found")]
     NoOpportunities,
-    
+
     #[error("Execution failed: {0}")]
     ExecutionFailed(String),
-    
+
     #[error("Risk limits exceeded: {0}")]
     RiskLimitExceeded(String),
-    
+
     #[error("Neural engine error: {0}")]
     NeuralEngine(String),
-    
+
     #[error("Task join error: {0}")]
     TaskJoin(String),
-    
+
     #[error("Configuration error: {0}")]
     Configuration(String),
 }
@@ -66,7 +69,7 @@ pub type ArbitrageResult<T> = Result<T, ArbitrageError>;
 pub struct VolatilityScore {
     pub symbol: String,
     pub exchange: ExchangeId,
-    pub score: f64,              // 0.0 to 1.0, higher = more volatile
+    pub score: f64, // 0.0 to 1.0, higher = more volatile
     pub price_change_1m: Decimal,
     pub price_change_5m: Decimal,
     pub price_change_15m: Decimal,
@@ -88,10 +91,10 @@ pub struct ArbitrageOpportunity {
     pub price_difference: Decimal,
     pub profit_percentage: f64,
     pub estimated_profit: Decimal,
-    pub confidence_score: f64,     // AI confidence in opportunity
-    pub max_quantity: Decimal,     // Maximum tradeable quantity
+    pub confidence_score: f64, // AI confidence in opportunity
+    pub max_quantity: Decimal, // Maximum tradeable quantity
     pub time_sensitivity: TimeSensitivity,
-    pub risk_score: f64,          // 0.0 to 1.0, higher = riskier
+    pub risk_score: f64, // 0.0 to 1.0, higher = riskier
     pub execution_complexity: ExecutionComplexity,
     pub detected_at: chrono::DateTime<chrono::Utc>,
     pub expires_at: chrono::DateTime<chrono::Utc>,
@@ -109,10 +112,10 @@ pub enum TimeSensitivity {
 /// Execution complexity levels
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ExecutionComplexity {
-    Simple,    // Single pair, direct arbitrage
-    Moderate,  // Multi-step execution required
-    Complex,   // Triangular or multi-hop arbitrage
-    Advanced,  // Cross-asset arbitrage
+    Simple,   // Single pair, direct arbitrage
+    Moderate, // Multi-step execution required
+    Complex,  // Triangular or multi-hop arbitrage
+    Advanced, // Cross-asset arbitrage
 }
 
 /// Capital allocation request for fund rebalancing
@@ -144,29 +147,29 @@ pub enum AllocationPriority {
 pub struct ArbitrageConfig {
     /// Minimum profit percentage to consider (e.g., 0.1 = 0.1%)
     pub min_profit_percentage: f64,
-    
+
     /// Maximum risk score to accept (0.0 to 1.0)
     pub max_risk_score: f64,
-    
+
     /// Minimum confidence score required (0.0 to 1.0)
     pub min_confidence_score: f64,
-    
+
     /// Maximum position size per opportunity
     pub max_position_size: Decimal,
-    
+
     /// Maximum daily capital allocation
     pub max_daily_allocation: Decimal,
-    
+
     /// Target return multipliers (5:1 to 20:1 as specified)
     pub target_return_min: f64,
     pub target_return_max: f64,
-    
+
     /// Capital allocation aggressiveness (0.0 to 1.0)
     pub allocation_aggressiveness: f64,
-    
+
     /// Volatility scanning frequency in milliseconds
     pub scan_frequency_ms: u64,
-    
+
     /// Enable aggressive mode (Gordon Gekko style)
     pub gekko_mode: bool,
 }
@@ -182,8 +185,8 @@ impl Default for ArbitrageConfig {
             target_return_min: 5.0,
             target_return_max: 20.0,
             allocation_aggressiveness: 0.8, // Highly aggressive
-            scan_frequency_ms: 100, // 100ms scanning
-            gekko_mode: true, // "Greed is good"
+            scan_frequency_ms: 100,         // 100ms scanning
+            gekko_mode: true,               // "Greed is good"
         }
     }
 }
@@ -193,10 +196,10 @@ pub struct ArbitrageEngine {
     config: ArbitrageConfig,
     exchanges: HashMap<ExchangeId, Arc<dyn ExchangeConnector>>,
     volatility_scanner: Arc<VolatilityScanner>,
-    capital_allocator: Arc<CapitalAllocator>, 
+    capital_allocator: Arc<CapitalAllocator>,
     opportunity_detector: Arc<OpportunityDetector>,
     execution_engine: Arc<ExecutionEngine>,
-    
+
     // State tracking
     active_opportunities: Arc<RwLock<HashMap<Uuid, ArbitrageOpportunity>>>,
     performance_metrics: Arc<RwLock<PerformanceMetrics>>,
@@ -256,26 +259,28 @@ impl ArbitrageEngine {
     /// Start the arbitrage engine with continuous scanning
     pub async fn start(&self) -> ArbitrageResult<()> {
         info!("🔥 Starting Gordon Gekko Arbitrage Engine - Greed is Good! 🔥");
-        
+
         if self.config.gekko_mode {
             info!("💰 GEKKO MODE ENABLED: Maximum aggression, maximum profits!");
         }
 
         // Start volatility scanning
         let scanner_handle = self.start_volatility_scanning().await?;
-        
+
         // Start opportunity detection
         let detection_handle = self.start_opportunity_detection().await?;
-        
+
         // Start capital allocation management
         let allocation_handle = self.start_capital_management().await?;
-        
+
         // Start performance monitoring
         let monitoring_handle = self.start_performance_monitoring().await?;
 
         info!("✅ Arbitrage engine started successfully");
-        info!("🎯 Target returns: {}:1 to {}:1", 
-              self.config.target_return_min, self.config.target_return_max);
+        info!(
+            "🎯 Target returns: {}:1 to {}:1",
+            self.config.target_return_min, self.config.target_return_max
+        );
         info!("⚡ Scan frequency: {}ms", self.config.scan_frequency_ms);
         info!("💀 Max risk score: {}", self.config.max_risk_score);
 
@@ -286,7 +291,7 @@ impl ArbitrageEngine {
             allocation_handle,
             monitoring_handle
         ) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(e) => return Err(ArbitrageError::TaskJoin(e.to_string())),
         }
 
@@ -296,11 +301,11 @@ impl ArbitrageEngine {
     /// Stop the arbitrage engine gracefully
     pub async fn stop(&self) -> ArbitrageResult<()> {
         info!("🛑 Stopping arbitrage engine...");
-        
+
         // Cancel all active opportunities
         let mut opportunities = self.active_opportunities.write().await;
         opportunities.clear();
-        
+
         info!("✅ Arbitrage engine stopped");
         Ok(())
     }
@@ -323,38 +328,38 @@ impl ArbitrageEngine {
     /// Emergency stop - halt all trading immediately
     pub async fn emergency_stop(&self) -> ArbitrageResult<()> {
         error!("🚨 EMERGENCY STOP TRIGGERED 🚨");
-        
+
         let mut risk_monitor = self.risk_monitor.write().await;
         risk_monitor.circuit_breaker_triggered = true;
-        
+
         // Cancel all pending orders across all exchanges
         for (exchange_id, _connector) in &self.exchanges {
             warn!("Cancelling all orders on {:?}", exchange_id);
             // Implementation would cancel all active orders
         }
-        
+
         // Clear all opportunities
         let mut opportunities = self.active_opportunities.write().await;
         opportunities.clear();
-        
+
         error!("🛡️ Emergency stop complete - all trading halted");
         Ok(())
     }
 
     // Private implementation methods
-    
-    async fn start_volatility_scanning(&self) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
+
+    async fn start_volatility_scanning(
+        &self,
+    ) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
         let scanner = Arc::clone(&self.volatility_scanner);
         let frequency = self.config.scan_frequency_ms;
-        
+
         let handle = tokio::spawn(async move {
-            let mut interval = tokio::time::interval(
-                tokio::time::Duration::from_millis(frequency)
-            );
-            
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_millis(frequency));
+
             loop {
                 interval.tick().await;
-                
+
                 match scanner.scan_volatility().await {
                     Ok(scores) => {
                         debug!("Scanned volatility for {} instruments", scores.len());
@@ -365,22 +370,24 @@ impl ArbitrageEngine {
                 }
             }
         });
-        
+
         Ok(handle)
     }
-    
-    async fn start_opportunity_detection(&self) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
+
+    async fn start_opportunity_detection(
+        &self,
+    ) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
         let detector = Arc::clone(&self.opportunity_detector);
         let opportunities = Arc::clone(&self.active_opportunities);
-        
+
         let handle = tokio::spawn(async move {
             let mut interval = tokio::time::interval(
-                tokio::time::Duration::from_millis(50) // 50ms detection cycle  
+                tokio::time::Duration::from_millis(50), // 50ms detection cycle
             );
-            
+
             loop {
                 interval.tick().await;
-                
+
                 match detector.detect_opportunities().await {
                     Ok(new_opportunities) => {
                         let mut active = opportunities.write().await;
@@ -394,21 +401,23 @@ impl ArbitrageEngine {
                 }
             }
         });
-        
+
         Ok(handle)
     }
-    
-    async fn start_capital_management(&self) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
+
+    async fn start_capital_management(
+        &self,
+    ) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
         let allocator = Arc::clone(&self.capital_allocator);
-        
+
         let handle = tokio::spawn(async move {
             let mut interval = tokio::time::interval(
-                tokio::time::Duration::from_secs(5) // 5-second allocation cycle
+                tokio::time::Duration::from_secs(5), // 5-second allocation cycle
             );
-            
+
             loop {
                 interval.tick().await;
-                
+
                 match allocator.rebalance_capital().await {
                     Ok(_) => {
                         debug!("Capital rebalancing completed");
@@ -419,42 +428,45 @@ impl ArbitrageEngine {
                 }
             }
         });
-        
+
         Ok(handle)
     }
-    
-    async fn start_performance_monitoring(&self) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
+
+    async fn start_performance_monitoring(
+        &self,
+    ) -> ArbitrageResult<tokio::task::JoinHandle<ArbitrageResult<()>>> {
         let metrics = Arc::clone(&self.performance_metrics);
         let risk_monitor = Arc::clone(&self.risk_monitor);
-        
+
         let handle = tokio::spawn(async move {
             let mut interval = tokio::time::interval(
-                tokio::time::Duration::from_secs(10) // 10-second monitoring cycle
+                tokio::time::Duration::from_secs(10), // 10-second monitoring cycle
             );
-            
+
             loop {
                 interval.tick().await;
-                
+
                 // Update performance metrics
                 let mut metrics_guard = metrics.write().await;
                 metrics_guard.success_rate = if metrics_guard.total_opportunities_detected > 0 {
-                    (metrics_guard.successful_arbitrages as f64) / 
-                    (metrics_guard.total_opportunities_detected as f64) * 100.0
+                    (metrics_guard.successful_arbitrages as f64)
+                        / (metrics_guard.total_opportunities_detected as f64)
+                        * 100.0
                 } else {
                     0.0
                 };
-                
+
                 // Update risk monitoring
                 let mut risk_guard = risk_monitor.write().await;
                 risk_guard.last_risk_check = chrono::Utc::now();
-                
+
                 drop(metrics_guard);
                 drop(risk_guard);
-                
+
                 debug!("Performance monitoring cycle completed");
             }
         });
-        
+
         Ok(handle)
     }
 }
@@ -479,8 +491,8 @@ mod tests {
             symbol: "BTC-USD".to_string(),
             exchange: ExchangeId::Coinbase,
             score: 0.85,
-            price_change_1m: Decimal::new(150, 2), // 1.50
-            price_change_5m: Decimal::new(750, 2), // 7.50
+            price_change_1m: Decimal::new(150, 2),   // 1.50
+            price_change_5m: Decimal::new(750, 2),   // 7.50
             price_change_15m: Decimal::new(1250, 2), // 12.50
             volume_surge_factor: 2.5,
             spread_tightness: 0.9,

@@ -55,21 +55,32 @@ impl VolatilityScanner {
 
     /// Initialize scanner by fetching trading pairs from all exchanges
     pub async fn initialize(&self) -> ArbitrageResult<()> {
-        info!("🔍 Initializing volatility scanner across {} exchanges", self.exchanges.len());
+        info!(
+            "🔍 Initializing volatility scanner across {} exchanges",
+            self.exchanges.len()
+        );
 
         let mut trading_pairs = self.trading_pairs.write().await;
-        
+
         for (exchange_id, connector) in &self.exchanges {
             match connector.get_trading_pairs().await {
                 Ok(pairs) => {
                     let symbols: Vec<String> = pairs.into_iter().map(|p| p.symbol).collect();
-                    info!("📊 Loaded {} trading pairs from {:?}", symbols.len(), exchange_id);
+                    info!(
+                        "📊 Loaded {} trading pairs from {:?}",
+                        symbols.len(),
+                        exchange_id
+                    );
                     trading_pairs.insert(*exchange_id, symbols);
                 }
                 Err(e) => {
-                    warn!("Failed to fetch trading pairs from {:?}: {}", exchange_id, e);
+                    warn!(
+                        "Failed to fetch trading pairs from {:?}: {}",
+                        exchange_id, e
+                    );
                     return Err(ArbitrageError::Exchange(format!(
-                        "Failed to initialize exchange {:?}: {}", exchange_id, e
+                        "Failed to initialize exchange {:?}: {}",
+                        exchange_id, e
                     )));
                 }
             }
@@ -89,17 +100,23 @@ impl VolatilityScanner {
         for (exchange_id, symbols) in trading_pairs.iter() {
             if let Some(connector) = self.exchanges.get(exchange_id) {
                 for symbol in symbols {
-                    match self.calculate_volatility_score(exchange_id, symbol, connector).await {
+                    match self
+                        .calculate_volatility_score(exchange_id, symbol, connector)
+                        .await
+                    {
                         Ok(score) => {
                             all_scores.push(score.clone());
-                            
+
                             // Update internal volatility scores
                             let mut scores = self.volatility_scores.write().await;
                             let key = format!("{:?}:{}", exchange_id, symbol);
                             scores.insert(key, score);
                         }
                         Err(e) => {
-                            debug!("Failed to calculate volatility for {}:{:?}: {}", symbol, exchange_id, e);
+                            debug!(
+                                "Failed to calculate volatility for {}:{:?}: {}",
+                                symbol, exchange_id, e
+                            );
                         }
                     }
                 }
@@ -107,11 +124,17 @@ impl VolatilityScanner {
         }
 
         // Sort by volatility score descending (most volatile first)
-        all_scores.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+        all_scores.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
-        info!("📈 Volatility scan complete: {} instruments analyzed, top score: {:.2}", 
-              all_scores.len(), 
-              all_scores.first().map(|s| s.score).unwrap_or(0.0));
+        info!(
+            "📈 Volatility scan complete: {} instruments analyzed, top score: {:.2}",
+            all_scores.len(),
+            all_scores.first().map(|s| s.score).unwrap_or(0.0)
+        );
 
         Ok(all_scores)
     }
@@ -120,10 +143,14 @@ impl VolatilityScanner {
     pub async fn get_top_volatile_instruments(&self, limit: usize) -> Vec<VolatilityScore> {
         let scores = self.volatility_scores.read().await;
         let mut all_scores: Vec<VolatilityScore> = scores.values().cloned().collect();
-        
+
         // Sort by score descending
-        all_scores.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
-        
+        all_scores.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
         all_scores.into_iter().take(limit).collect()
     }
 
@@ -135,11 +162,14 @@ impl VolatilityScanner {
         connector: &Arc<dyn ExchangeConnector>,
     ) -> ArbitrageResult<VolatilityScore> {
         // Get current market data
-        let market_data = connector.get_market_data(symbol).await
+        let market_data = connector
+            .get_market_data(symbol)
+            .await
             .map_err(|e| ArbitrageError::Exchange(e.to_string()))?;
 
         // Update price history
-        self.update_price_history(exchange_id, symbol, &market_data).await;
+        self.update_price_history(exchange_id, symbol, &market_data)
+            .await;
 
         // Calculate volatility components
         let price_changes = self.calculate_price_changes(exchange_id, symbol).await;
@@ -170,10 +200,15 @@ impl VolatilityScanner {
     }
 
     /// Update price history for an instrument
-    async fn update_price_history(&self, exchange_id: &ExchangeId, symbol: &str, market_data: &MarketTick) {
+    async fn update_price_history(
+        &self,
+        exchange_id: &ExchangeId,
+        symbol: &str,
+        market_data: &MarketTick,
+    ) {
         let mut history = self.historical_prices.write().await;
         let key = format!("{:?}:{}", exchange_id, symbol);
-        
+
         let price_history = history.entry(key).or_insert_with(|| PriceHistory {
             prices: Vec::new(),
             volumes: Vec::new(),
@@ -202,12 +237,16 @@ impl VolatilityScanner {
     }
 
     /// Calculate price changes over different time windows
-    async fn calculate_price_changes(&self, exchange_id: &ExchangeId, symbol: &str) -> HashMap<u64, Decimal> {
+    async fn calculate_price_changes(
+        &self,
+        exchange_id: &ExchangeId,
+        symbol: &str,
+    ) -> HashMap<u64, Decimal> {
         let history = self.historical_prices.read().await;
         let key = format!("{:?}:{}", exchange_id, symbol);
-        
+
         let mut changes = HashMap::new();
-        
+
         if let Some(price_history) = history.get(&key) {
             if price_history.prices.len() < 2 {
                 return changes;
@@ -218,18 +257,20 @@ impl VolatilityScanner {
 
             for &window_seconds in VOLATILITY_WINDOWS {
                 let window_start = now - chrono::Duration::seconds(window_seconds as i64);
-                
+
                 // Find the price closest to window_start
-                if let Some(historical_price) = price_history.prices.iter()
+                if let Some(historical_price) = price_history
+                    .prices
+                    .iter()
                     .filter(|p| p.timestamp >= window_start)
-                    .min_by_key(|p| (p.timestamp - window_start).num_seconds().abs()) {
-                    
+                    .min_by_key(|p| (p.timestamp - window_start).num_seconds().abs())
+                {
                     let price_change = current_price - historical_price.price;
                     changes.insert(window_seconds, price_change);
                 }
             }
         }
-        
+
         changes
     }
 
@@ -237,18 +278,21 @@ impl VolatilityScanner {
     async fn calculate_volume_surge(&self, exchange_id: &ExchangeId, symbol: &str) -> f64 {
         let history = self.historical_prices.read().await;
         let key = format!("{:?}:{}", exchange_id, symbol);
-        
+
         if let Some(price_history) = history.get(&key) {
             if price_history.volumes.len() < 10 {
                 return 1.0; // No surge if insufficient data
             }
 
             let recent_volume = price_history.volumes.last().unwrap().volume;
-            let average_volume: Decimal = price_history.volumes.iter()
+            let average_volume: Decimal = price_history
+                .volumes
+                .iter()
                 .rev()
                 .take(20) // Last 20 data points
                 .map(|v| v.volume)
-                .sum::<Decimal>() / Decimal::new(20, 0);
+                .sum::<Decimal>()
+                / Decimal::new(20, 0);
 
             if average_volume > Decimal::ZERO {
                 let surge_factor = recent_volume / average_volume;
@@ -265,7 +309,7 @@ impl VolatilityScanner {
     fn calculate_spread_tightness(&self, market_data: &MarketTick) -> f64 {
         let spread = market_data.ask - market_data.bid;
         let mid_price = (market_data.ask + market_data.bid) / Decimal::new(2, 0);
-        
+
         if mid_price > Decimal::ZERO {
             let spread_percentage: f64 = (spread / mid_price).to_string().parse().unwrap_or(1.0);
             // Invert so tighter spreads get higher scores (max 1.0)
@@ -279,14 +323,16 @@ impl VolatilityScanner {
     async fn calculate_momentum(&self, exchange_id: &ExchangeId, symbol: &str) -> f64 {
         let history = self.historical_prices.read().await;
         let key = format!("{:?}:{}", exchange_id, symbol);
-        
+
         if let Some(price_history) = history.get(&key) {
             if price_history.prices.len() < 20 {
                 return 0.5; // Neutral momentum if insufficient data
             }
 
             // Calculate simple momentum as price direction consistency
-            let recent_prices: Vec<Decimal> = price_history.prices.iter()
+            let recent_prices: Vec<Decimal> = price_history
+                .prices
+                .iter()
                 .rev()
                 .take(20)
                 .map(|p| p.price)
@@ -296,8 +342,8 @@ impl VolatilityScanner {
             let mut total_moves = 0;
 
             for i in 1..recent_prices.len() {
-                if recent_prices[i-1] != recent_prices[i] {
-                    if recent_prices[i] > recent_prices[i-1] {
+                if recent_prices[i - 1] != recent_prices[i] {
+                    if recent_prices[i] > recent_prices[i - 1] {
                         up_moves += 1;
                     }
                     total_moves += 1;
@@ -331,7 +377,8 @@ impl VolatilityScanner {
         // Calculate price volatility score from price changes
         let mut price_volatility = 0.0;
         if !price_changes.is_empty() {
-            let total_change: f64 = price_changes.values()
+            let total_change: f64 = price_changes
+                .values()
                 .map(|change| change.abs().to_string().parse().unwrap_or(0.0))
                 .sum();
             price_volatility = (total_change / price_changes.len() as f64).min(1.0);
@@ -361,7 +408,7 @@ mod tests {
     #[test]
     fn test_spread_tightness_calculation() {
         let scanner = VolatilityScanner::new(HashMap::new());
-        
+
         let market_data = MarketTick {
             symbol: "BTC-USD".to_string(),
             bid: Decimal::new(49950, 0), // $499.50
@@ -378,10 +425,10 @@ mod tests {
     #[test]
     fn test_volatility_factors_combination() {
         let scanner = VolatilityScanner::new(HashMap::new());
-        
+
         let mut price_changes = HashMap::new();
         price_changes.insert(60, Decimal::new(100, 0)); // $1.00 change in 1 minute
-        
+
         let score = scanner.combine_volatility_factors(
             &price_changes,
             2.5, // 2.5x volume surge

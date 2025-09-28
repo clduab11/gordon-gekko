@@ -3,9 +3,12 @@
 //! This module implements sophisticated arbitrage opportunity detection using
 //! AI/ML models to identify profitable cross-exchange trading opportunities.
 
-use crate::{ArbitrageConfig, ArbitrageError, ArbitrageOpportunity, ArbitrageResult, ExecutionComplexity, TimeSensitivity};
-use rust_decimal::Decimal;
+use crate::{
+    ArbitrageConfig, ArbitrageError, ArbitrageOpportunity, ArbitrageResult, ExecutionComplexity,
+    TimeSensitivity,
+};
 use exchange_connectors::ExchangeId;
+use rust_decimal::Decimal;
 use tracing::{debug, info};
 use uuid::Uuid;
 
@@ -23,21 +26,24 @@ impl OpportunityDetector {
     /// Detect arbitrage opportunities across exchanges
     pub async fn detect_opportunities(&self) -> ArbitrageResult<Vec<ArbitrageOpportunity>> {
         debug!("🔍 Detecting arbitrage opportunities...");
-        
+
         // Placeholder implementation - real version would:
         // 1. Analyze price differences across exchanges
         // 2. Use ML models to predict opportunity viability
         // 3. Calculate risk scores and confidence levels
         // 4. Filter by configuration thresholds
-        
+
         let opportunities = Vec::new(); // Placeholder
-        
+
         if opportunities.is_empty() {
             debug!("No arbitrage opportunities detected");
         } else {
-            info!("🎯 Detected {} arbitrage opportunities", opportunities.len());
+            info!(
+                "🎯 Detected {} arbitrage opportunities",
+                opportunities.len()
+            );
         }
-        
+
         Ok(opportunities)
     }
 }

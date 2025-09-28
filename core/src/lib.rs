@@ -5,9 +5,9 @@
 //! blocks for the entire trading system.
 
 pub mod error;
-pub mod types;
 pub mod order_manager;
 pub mod smart_router;
+pub mod types;
 
 // Re-export commonly used types
 pub use error::*;

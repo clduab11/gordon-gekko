@@ -1,0 +1,40 @@
+[package]
+name = "data-pipeline"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["exchange-integrations"]
+exchange-integrations = ["dep:exchange-connectors"]
+
+[dependencies]
+ahash = "0.8"
+async-trait = { workspace = true }
+crossbeam-channel = { workspace = true }
+event-bus = { path = "../event-bus" }
+futures = "0.3"
+futures-util = "0.3"
+rust_decimal = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "sync", "macros", "time"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+tokio-tungstenite = { workspace = true }
+tracing = { workspace = true }
+
+thiserror = { workspace = true }
+url = { workspace = true }
+rand = "0.8"
+
+# Optional integration with exchange connectors (reuses existing trait contracts)
+exchange-connectors = { path = "../exchange-connectors", optional = true }
+
+[dev-dependencies]
+chrono = { workspace = true }
+criterion = { version = "0.5", features = ["async_tokio"] }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time"] }
+rust_decimal_macros = "1.36"
+
+[[bench]]
+name = "normalizer"
+harness = false

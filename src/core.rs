@@ -1,8 +1,8 @@
 //! Core Ninja Gekko system implementation
 
-use std::fmt;
 use crate::mcp::McpManager;
 use crate::neural::NeuralBackend;
+use std::fmt;
 
 /// Main Ninja Gekko bot struct
 #[derive(Debug)]
@@ -56,33 +56,33 @@ impl NinjaGekko {
             dry_run: false,
         }
     }
-    
+
     /// Start the bot
     pub async fn start(&self) -> Result<(), Box<dyn std::error::Error>> {
         tracing::info!("🥷 Starting Ninja Gekko in {:?} mode", self.mode);
-        
+
         // Initialize components based on mode
         match self.mode {
             OperationMode::Stealth => self.start_stealth_mode().await?,
             OperationMode::Precision => self.start_precision_mode().await?,
             OperationMode::Swarm => self.start_swarm_mode().await?,
         }
-        
+
         Ok(())
     }
-    
+
     async fn start_stealth_mode(&self) -> Result<(), Box<dyn std::error::Error>> {
         tracing::info!("🌙 Initializing stealth operations...");
         // TODO: Implement stealth mode logic
         Ok(())
     }
-    
+
     async fn start_precision_mode(&self) -> Result<(), Box<dyn std::error::Error>> {
         tracing::info!("⚡ Initializing precision operations...");
         // TODO: Implement precision mode logic
         Ok(())
     }
-    
+
     async fn start_swarm_mode(&self) -> Result<(), Box<dyn std::error::Error>> {
         tracing::info!("🤖 Initializing swarm operations...");
         // TODO: Implement swarm mode logic
@@ -96,29 +96,29 @@ impl NinjaGekkoBuilder {
         self.mode = mode;
         self
     }
-    
+
     /// Set neural backend
     pub fn neural_backend(mut self, backend: NeuralBackend) -> Self {
         self.neural_backend = backend;
         self
     }
-    
+
     /// Set MCP servers
     pub fn mcp_servers(mut self, servers: Vec<String>) -> Self {
         self.mcp_servers = servers;
         self
     }
-    
+
     /// Set dry run mode
     pub fn dry_run(mut self, dry_run: bool) -> Self {
         self.dry_run = dry_run;
         self
     }
-    
+
     /// Build the NinjaGekko instance
     pub async fn build(self) -> Result<NinjaGekko, Box<dyn std::error::Error>> {
         let mcp_manager = McpManager::new(self.mcp_servers).await?;
-        
+
         Ok(NinjaGekko {
             mode: self.mode,
             neural_backend: self.neural_backend,
@@ -132,14 +132,14 @@ impl NinjaGekkoBuilder {
 mod tests {
     use super::*;
     use crate::mcp::servers;
-    
+
     #[test]
     fn test_operation_mode_display() {
         assert_eq!(OperationMode::Stealth.to_string(), "Stealth");
         assert_eq!(OperationMode::Precision.to_string(), "Precision");
         assert_eq!(OperationMode::Swarm.to_string(), "Swarm");
     }
-    
+
     #[tokio::test]
     async fn test_builder_pattern() {
         let result = NinjaGekko::builder()
@@ -149,7 +149,7 @@ mod tests {
             .dry_run(true)
             .build()
             .await;
-        
+
         assert!(result.is_ok());
         let bot = result.unwrap();
         assert_eq!(bot.mode, OperationMode::Stealth);

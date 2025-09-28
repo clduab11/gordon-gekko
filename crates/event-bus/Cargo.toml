@@ -1,0 +1,37 @@
+[package]
+name = "event-bus"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["core-integration", "exchange-integration"]
+core-integration = ["dep:ninja-gekko-core"]
+exchange-integration = ["dep:exchange-connectors"]
+
+[dependencies]
+async-trait = { workspace = true }
+bincode = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+crossbeam-channel = { workspace = true }
+rust_decimal = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+thiserror = { workspace = true }
+
+# Optional integrations
+ninja-gekko-core = { path = "../../core", optional = true }
+exchange-connectors = { path = "../exchange-connectors", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async_tokio"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
+serde_json = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[[bench]]
+name = "dispatcher"
+harness = false

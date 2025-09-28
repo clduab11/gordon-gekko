@@ -1,5 +1,5 @@
 //! MCP Admin Actions for Arbitrage Operations
-//! 
+//!
 //! This module implements administrative actions for the Tenno-MCP system
 //! specifically focused on fund transfers, balance queries, and risk management
 //! for the Gordon Gekko arbitrage trading system.
@@ -8,9 +8,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-// Re-export types from arbitrage engine for MCP integration  
-pub use exchange_connectors::{ExchangeId, TransferUrgency, TransferStatus};
+// Re-export types from arbitrage engine for MCP integration
 pub use arbitrage_engine::{AllocationPriority, ArbitrageConfig};
+pub use exchange_connectors::{ExchangeId, TransferStatus, TransferUrgency};
 
 /// Transfer request for cross-exchange fund movements
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -64,10 +64,10 @@ pub mod utils;
 /// Re-exports for convenience
 pub mod prelude {
     pub use crate::core::{NinjaGekko, OperationMode};
-    pub use crate::neural::NeuralBackend;
     pub use crate::mcp::McpManager;
-    pub use crate::trading::{TradingEngine, Strategy};
+    pub use crate::neural::NeuralBackend;
     pub use crate::swarm::SwarmIntelligence;
+    pub use crate::trading::{Strategy, TradingEngine};
 }
 
 /// Version information
@@ -77,7 +77,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const BUILD_INFO: &str = concat!(
     "Ninja Gekko v",
     env!("CARGO_PKG_VERSION"),
-    " (", 
+    " (",
     env!("CARGO_PKG_REPOSITORY"),
     ")"
 );

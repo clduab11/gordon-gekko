@@ -21,16 +21,21 @@ impl ExecutionEngine {
     }
 
     /// Execute an arbitrage opportunity
-    pub async fn execute_arbitrage(&self, opportunity: &ArbitrageOpportunity) -> ArbitrageResult<()> {
-        info!("⚡ Executing arbitrage: {} on {:?} -> {:?}", 
-              opportunity.symbol, opportunity.buy_exchange, opportunity.sell_exchange);
-        
+    pub async fn execute_arbitrage(
+        &self,
+        opportunity: &ArbitrageOpportunity,
+    ) -> ArbitrageResult<()> {
+        info!(
+            "⚡ Executing arbitrage: {} on {:?} -> {:?}",
+            opportunity.symbol, opportunity.buy_exchange, opportunity.sell_exchange
+        );
+
         // Placeholder implementation - real version would:
         // 1. Place simultaneous buy/sell orders
         // 2. Monitor execution status
         // 3. Handle partial fills and errors
         // 4. Implement risk controls
-        
+
         debug!("✅ Arbitrage execution completed (placeholder)");
         Ok(())
     }

@@ -1,12 +1,13 @@
+use async_trait::async_trait;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
+use std::fmt;
 use tokio::sync::RwLock;
-use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use async_trait::async_trait;
 
-use crate::types::{Order, OrderId, OrderType, OrderSide, OrderStatus, Execution, AccountId, Symbol};
 use crate::error::{TradingError, TradingResult};
+use crate::types::{
+    AccountId, Execution, Order, OrderId, OrderSide, OrderStatus, OrderType, Symbol,
+};
 
 /// Order management system for handling order lifecycle, validation, and execution.
 ///
@@ -16,7 +17,6 @@ use crate::error::{TradingError, TradingResult};
 /// - Order matching and execution
 /// - Order persistence and retrieval
 /// - Risk checks and compliance
-#[derive(Debug)]
 pub struct OrderManager {
     /// Active orders indexed by order ID
     orders: RwLock<HashMap<OrderId, Order>>,
@@ -29,6 +29,12 @@ pub struct OrderManager {
 
     /// Fee calculator for execution costs
     fee_calculator: Box<dyn FeeCalculator + Send + Sync>,
+}
+
+impl fmt::Debug for OrderManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("OrderManager").finish_non_exhaustive()
+    }
 }
 
 impl OrderManager {
@@ -81,9 +87,10 @@ impl OrderManager {
 
         if let Some(order) = orders.get_mut(&order_id) {
             if !order.is_active() {
-                return Err(TradingError::OrderValidation(
-                    format!("Order {} is not in an active state", order_id)
-                ));
+                return Err(TradingError::OrderValidation(format!(
+                    "Order {} is not in an active state",
+                    order_id
+                )));
             }
 
             order.status = OrderStatus::Cancelled;
@@ -103,7 +110,8 @@ impl OrderManager {
     /// Gets an order by ID
     pub async fn get_order(&self, order_id: OrderId) -> TradingResult<Order> {
         let orders = self.orders.read().await;
-        orders.get(&order_id)
+        orders
+            .get(&order_id)
             .cloned()
             .ok_or_else(|| TradingError::OrderNotFound(order_id.to_string()))
     }
@@ -120,7 +128,11 @@ impl OrderManager {
     }
 
     /// Processes market data updates and executes matching orders
-    pub async fn process_market_data(&self, symbol: Symbol, price: Decimal) -> TradingResult<Vec<Execution>> {
+    pub async fn process_market_data(
+        &self,
+        symbol: Symbol,
+        price: Decimal,
+    ) -> TradingResult<Vec<Execution>> {
         let mut executions = Vec::new();
 
         // Check for limit orders that can be executed at the new price
@@ -159,25 +171,32 @@ impl OrderManager {
     async fn validate_order(&self, order: &Order) -> TradingResult<()> {
         // Basic validation
         if order.quantity <= Decimal::ZERO {
-            return Err(TradingError::OrderValidation("Order quantity must be positive".into()));
+            return Err(TradingError::OrderValidation(
+                "Order quantity must be positive".into(),
+            ));
         }
 
         if let Some(price) = order.price {
             if price <= Decimal::ZERO {
-                return Err(TradingError::OrderValidation("Order price must be positive".into()));
+                return Err(TradingError::OrderValidation(
+                    "Order price must be positive".into(),
+                ));
             }
         }
 
         if order.order_type.requires_price() && order.price.is_none() {
-            return Err(TradingError::OrderValidation(
-                format!("{:?} orders must have a price", order.order_type)
-            ));
+            return Err(TradingError::OrderValidation(format!(
+                "{:?} orders must have a price",
+                order.order_type
+            )));
         }
 
         // Risk validation
         let account_orders = self.list_orders(order.account_id.clone()).await?;
         let orders_slice: &[Order] = &account_orders;
-        self.risk_manager.validate_order(order, orders_slice).await?;
+        self.risk_manager
+            .validate_order(order, orders_slice)
+            .await?;
 
         Ok(())
     }
@@ -232,7 +251,8 @@ impl OrderBook {
                 OrderSide::Sell => &mut self.sell_orders,
             };
 
-            orders.entry(order.symbol.clone())
+            orders
+                .entry(order.symbol.clone())
                 .or_insert_with(Vec::new)
                 .push((order_id, price));
         }
@@ -279,11 +299,7 @@ impl OrderBook {
 #[async_trait]
 pub trait RiskValidator: Send + Sync {
     /// Validates an order against risk limits
-    async fn validate_order(
-        &self,
-        order: &Order,
-        existing_orders: &[Order],
-    ) -> TradingResult<()>;
+    async fn validate_order(&self, order: &Order, existing_orders: &[Order]) -> TradingResult<()>;
 }
 
 /// Default implementation of risk validator
@@ -315,16 +331,13 @@ impl DefaultRiskValidator {
 
 #[async_trait]
 impl RiskValidator for DefaultRiskValidator {
-    async fn validate_order(
-        &self,
-        order: &Order,
-        existing_orders: &[Order],
-    ) -> TradingResult<()> {
+    async fn validate_order(&self, order: &Order, existing_orders: &[Order]) -> TradingResult<()> {
         // Check order size limits
         if order.quantity > self.max_order_size {
-            return Err(TradingError::OrderValidation(
-                format!("Order size {} exceeds maximum allowed {}", order.quantity, self.max_order_size)
-            ));
+            return Err(TradingError::OrderValidation(format!(
+                "Order size {} exceeds maximum allowed {}",
+                order.quantity, self.max_order_size
+            )));
         }
 
         // Calculate current exposure for this symbol
@@ -335,9 +348,10 @@ impl RiskValidator for DefaultRiskValidator {
             .sum();
 
         if symbol_exposure + order.quantity > self.max_position_size {
-            return Err(TradingError::OrderValidation(
-                format!("Position size would exceed limit for symbol {}", order.symbol)
-            ));
+            return Err(TradingError::OrderValidation(format!(
+                "Position size would exceed limit for symbol {}",
+                order.symbol
+            )));
         }
 
         // Calculate total portfolio exposure
@@ -349,7 +363,7 @@ impl RiskValidator for DefaultRiskValidator {
 
         if total_exposure + order.quantity > self.max_portfolio_exposure {
             return Err(TradingError::OrderValidation(
-                "Portfolio exposure would exceed maximum allowed".into()
+                "Portfolio exposure would exceed maximum allowed".into(),
             ));
         }
 
@@ -416,14 +430,17 @@ mod tests {
 
         let order_manager = OrderManager::new(risk_manager, fee_calculator);
 
-        let order_id = order_manager.submit_order(
-            "AAPL".to_string(),
-            OrderType::Limit,
-            OrderSide::Buy,
-            Decimal::new(100, 0),
-            Some(Decimal::new(15000, 2)),
-            "test_account".to_string(),
-        ).await.unwrap();
+        let order_id = order_manager
+            .submit_order(
+                "AAPL".to_string(),
+                OrderType::Limit,
+                OrderSide::Buy,
+                Decimal::new(100, 0),
+                Some(Decimal::new(15000, 2)),
+                "test_account".to_string(),
+            )
+            .await
+            .unwrap();
 
         let order = order_manager.get_order(order_id).await.unwrap();
         assert_eq!(order.symbol, "AAPL");
@@ -445,14 +462,17 @@ mod tests {
 
         let order_manager = OrderManager::new(risk_manager, fee_calculator);
 
-        let order_id = order_manager.submit_order(
-            "AAPL".to_string(),
-            OrderType::Limit,
-            OrderSide::Buy,
-            Decimal::new(100, 0),
-            Some(Decimal::new(15000, 2)),
-            "test_account".to_string(),
-        ).await.unwrap();
+        let order_id = order_manager
+            .submit_order(
+                "AAPL".to_string(),
+                OrderType::Limit,
+                OrderSide::Buy,
+                Decimal::new(100, 0),
+                Some(Decimal::new(15000, 2)),
+                "test_account".to_string(),
+            )
+            .await
+            .unwrap();
 
         order_manager.cancel_order(order_id).await.unwrap();
 
@@ -463,9 +483,9 @@ mod tests {
     #[tokio::test]
     async fn test_risk_validation() {
         let risk_manager = Box::new(DefaultRiskValidator::new(
-            Decimal::new(100, 0),   // Max order size
-            Decimal::new(500, 0),   // Max position size
-            Decimal::new(1000, 0),  // Max portfolio exposure
+            Decimal::new(100, 0),  // Max order size
+            Decimal::new(500, 0),  // Max position size
+            Decimal::new(1000, 0), // Max portfolio exposure
         ));
 
         let order = Order::new(

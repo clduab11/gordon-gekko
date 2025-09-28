@@ -80,8 +80,13 @@ impl TennoMcp {
     // /// Performs a web task using Playwright.
     /// Execute a fund transfer between exchanges
     pub async fn execute_transfer(&self, request: TransferRequest) -> Result<String, String> {
-        tracing::info!("🔄 Executing transfer: {} {} from {:?} to {:?}", 
-                      request.amount, request.currency, request.from_exchange, request.to_exchange);
+        tracing::info!(
+            "🔄 Executing transfer: {} {} from {:?} to {:?}",
+            request.amount,
+            request.currency,
+            request.from_exchange,
+            request.to_exchange
+        );
 
         // In a real implementation, this would:
         // 1. Validate the transfer request
@@ -89,10 +94,10 @@ impl TennoMcp {
         // 3. Initiate withdrawal from source exchange
         // 4. Monitor transfer status
         // 5. Confirm deposit on target exchange
-        
+
         // For now, return a simulated transfer ID
         let transfer_id = format!("TXN_{}", request.id);
-        
+
         tracing::info!("✅ Transfer initiated: {}", transfer_id);
         Ok(transfer_id)
     }
@@ -103,7 +108,7 @@ impl TennoMcp {
 
         // Simulate balance retrieval
         let mut exchange_balances = std::collections::HashMap::new();
-        
+
         // Add simulated balances for demonstration
         let demo_balances = vec![
             CurrencyBalance {
@@ -131,8 +136,10 @@ impl TennoMcp {
             retrieved_at: chrono::Utc::now(),
         };
 
-        tracing::info!("📊 Balance query completed: ${} total portfolio value", 
-                      response.total_portfolio_value_usd);
+        tracing::info!(
+            "📊 Balance query completed: ${} total portfolio value",
+            response.total_portfolio_value_usd
+        );
         Ok(response)
     }
 
@@ -149,7 +156,7 @@ impl TennoMcp {
         // 5. Log the shutdown event
 
         let shutdown_id = format!("SHUTDOWN_{}", shutdown.id);
-        
+
         match shutdown.scope {
             ShutdownScope::AllTrading => {
                 tracing::error!("🛑 ALL TRADING STOPPED");

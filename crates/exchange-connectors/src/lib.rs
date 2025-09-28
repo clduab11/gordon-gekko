@@ -10,13 +10,12 @@
 use async_trait::async_trait;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use thiserror::Error;
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-pub mod coinbase;
 pub mod binance_us;
+pub mod coinbase;
 pub mod oanda;
 
 /// Exchange connector error types
@@ -24,25 +23,28 @@ pub mod oanda;
 pub enum ExchangeError {
     #[error("Authentication failed: {0}")]
     Authentication(String),
-    
+
     #[error("Rate limit exceeded: {0}")]
     RateLimit(String),
-    
+
     #[error("Network error: {0}")]
     Network(String),
-    
+
     #[error("Invalid request: {0}")]
     InvalidRequest(String),
-    
+
     #[error("Exchange API error: {code} - {message}")]
     Api { code: String, message: String },
-    
+
     #[error("Insufficient balance: required {required}, available {available}")]
-    InsufficientBalance { required: Decimal, available: Decimal },
-    
+    InsufficientBalance {
+        required: Decimal,
+        available: Decimal,
+    },
+
     #[error("Symbol not supported: {0}")]
     UnsupportedSymbol(String),
-    
+
     #[error("Order not found: {0}")]
     OrderNotFound(String),
 }
@@ -162,9 +164,9 @@ pub struct TransferRequest {
 /// Transfer urgency levels for capital allocation
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TransferUrgency {
-    Low,    // Standard processing time
-    Normal, // Priority processing
-    High,   // Expedited processing (higher fees)
+    Low,      // Standard processing time
+    Normal,   // Priority processing
+    High,     // Expedited processing (higher fees)
     Critical, // Emergency reallocation
 }
 
@@ -173,22 +175,22 @@ pub enum TransferUrgency {
 pub trait ExchangeConnector: Send + Sync {
     /// Get exchange identifier
     fn exchange_id(&self) -> ExchangeId;
-    
+
     /// Connect to the exchange
     async fn connect(&mut self) -> ExchangeResult<()>;
-    
+
     /// Disconnect from the exchange
     async fn disconnect(&mut self) -> ExchangeResult<()>;
-    
+
     /// Check if connected and authenticated
     async fn is_connected(&self) -> bool;
-    
+
     /// Get supported trading pairs
     async fn get_trading_pairs(&self) -> ExchangeResult<Vec<TradingPair>>;
-    
+
     /// Get account balances
     async fn get_balances(&self) -> ExchangeResult<Vec<Balance>>;
-    
+
     /// Place an order
     async fn place_order(
         &self,
@@ -198,28 +200,28 @@ pub trait ExchangeConnector: Send + Sync {
         quantity: Decimal,
         price: Option<Decimal>,
     ) -> ExchangeResult<ExchangeOrder>;
-    
+
     /// Cancel an order
     async fn cancel_order(&self, order_id: &str) -> ExchangeResult<ExchangeOrder>;
-    
+
     /// Get order status
     async fn get_order(&self, order_id: &str) -> ExchangeResult<ExchangeOrder>;
-    
+
     /// Get market data
     async fn get_market_data(&self, symbol: &str) -> ExchangeResult<MarketTick>;
-    
+
     /// Start WebSocket stream for market data
     async fn start_market_stream(
         &self,
         symbols: Vec<String>,
     ) -> ExchangeResult<mpsc::UnboundedReceiver<StreamMessage>>;
-    
+
     /// Start WebSocket stream for order updates
     async fn start_order_stream(&self) -> ExchangeResult<mpsc::UnboundedReceiver<StreamMessage>>;
-    
+
     /// Transfer funds (for supported exchanges)
     async fn transfer_funds(&self, request: TransferRequest) -> ExchangeResult<String>;
-    
+
     /// Get transfer status
     async fn get_transfer_status(&self, transfer_id: &str) -> ExchangeResult<TransferStatus>;
 }
@@ -260,13 +262,13 @@ impl RateLimiter {
     pub fn new(requests_per_second: u32) -> Self {
         use governor::{Quota, RateLimiter as GovernorRateLimiter};
         use std::num::NonZeroU32;
-        
+
         let quota = Quota::per_second(NonZeroU32::new(requests_per_second).unwrap());
         let limiter = GovernorRateLimiter::direct(quota);
-        
+
         Self { governor: limiter }
     }
-    
+
     pub async fn acquire(&self) -> ExchangeResult<()> {
         self.governor.until_ready().await;
         Ok(())
@@ -278,23 +280,23 @@ pub mod utils {
     use super::*;
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
-    
+
     type HmacSha256 = Hmac<Sha256>;
-    
+
     /// Generate HMAC-SHA256 signature for API authentication
     pub fn hmac_sha256_signature(secret: &str, message: &str) -> String {
-        let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-            .expect("HMAC can take key of any size");
+        let mut mac =
+            HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC can take key of any size");
         mac.update(message.as_bytes());
         let result = mac.finalize();
         base64::encode(result.into_bytes())
     }
-    
+
     /// Generate timestamp for API calls
     pub fn timestamp() -> String {
         chrono::Utc::now().timestamp().to_string()
     }
-    
+
     /// Convert decimal to string with proper precision
     pub fn decimal_to_string(value: Decimal, precision: u32) -> String {
         format!("{:.precision$}", value, precision = precision as usize)

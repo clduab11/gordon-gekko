@@ -1,8 +1,8 @@
+use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use chrono::{DateTime, Utc};
 use std::collections::HashMap;
+use uuid::Uuid;
 
 /// Core trading types and data structures for the Ninja Gekko trading system.
 ///
@@ -12,13 +12,11 @@ use crate::error::{TradingError, TradingResult};
 
 // Re-export arbitrage types for integration
 pub use arbitrage_engine::{
-    ArbitrageOpportunity, VolatilityScore, AllocationRequest, AllocationPriority,
-    ArbitrageConfig, TimeSensitivity, ExecutionComplexity
+    AllocationPriority, AllocationRequest, ArbitrageConfig, ArbitrageOpportunity,
+    ExecutionComplexity, TimeSensitivity, VolatilityScore,
 };
 
-pub use exchange_connectors::{
-    ExchangeId, TransferRequest, TransferUrgency, TransferStatus
-};
+pub use exchange_connectors::{ExchangeId, TransferRequest, TransferStatus, TransferUrgency};
 
 /// Unique identifier for trading entities
 pub type OrderId = Uuid;
@@ -94,7 +92,7 @@ impl Order {
         match self.price {
             Some(price) => Ok(price * self.quantity),
             None => Err(TradingError::OrderValidation(
-                "Cannot calculate value for market order without price".into()
+                "Cannot calculate value for market order without price".into(),
             )),
         }
     }
@@ -380,7 +378,8 @@ impl Portfolio {
 
     /// Updates the portfolio with a new execution
     pub fn update_from_execution(&mut self, execution: &Execution) {
-        let position = self.positions
+        let position = self
+            .positions
             .entry(execution.symbol.clone())
             .or_insert_with(|| {
                 Position::new(
@@ -445,7 +444,13 @@ pub struct MarketData {
 
 impl MarketData {
     /// Creates new market data
-    pub fn new(symbol: Symbol, bid: Decimal, ask: Decimal, last_price: Decimal, volume_24h: Decimal) -> Self {
+    pub fn new(
+        symbol: Symbol,
+        bid: Decimal,
+        ask: Decimal,
+        last_price: Decimal,
+        volume_24h: Decimal,
+    ) -> Self {
         Self {
             symbol,
             bid,
@@ -578,8 +583,8 @@ impl Default for CircuitBreakerConfig {
             max_portfolio_var: Decimal::new(50000, 0),  // $50,000
             stop_loss_threshold: Decimal::new(5, 2),    // 5%
             thresholds: CircuitBreakerThresholds {
-                max_drawdown_pct: Decimal::new(10, 2),   // 10%
-                max_daily_loss: Decimal::new(10000, 0),  // $10,000
+                max_drawdown_pct: Decimal::new(10, 2),  // 10%
+                max_daily_loss: Decimal::new(10000, 0), // $10,000
                 max_consecutive_losses: 5,
             },
         }

@@ -39,6 +39,7 @@ base64 = "0.22"
 # Rate limiting
 tokio-util = { version = "0.7", features = ["time"] }
 governor = "0.6"
+parking_lot = { workspace = true }
 
 # WebSocket helpers
 futures-util = "0.3"

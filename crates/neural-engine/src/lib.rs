@@ -4,9 +4,9 @@
 //! including volatility prediction, cross-exchange analysis, and ML-powered
 //! opportunity detection.
 
-use std::collections::HashMap;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use thiserror::Error;
 use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
@@ -16,16 +16,16 @@ use tracing::{debug, info, warn};
 pub enum NeuralError {
     #[error("Model not found: {0}")]
     ModelNotFound(String),
-    
+
     #[error("Inference failed: {0}")]
     InferenceFailed(String),
-    
+
     #[error("Model loading failed: {0}")]
     ModelLoadingFailed(String),
-    
+
     #[error("Invalid input data: {0}")]
     InvalidInput(String),
-    
+
     #[error("Training failed: {0}")]
     TrainingFailed(String),
 }
@@ -153,9 +153,11 @@ pub struct ArbitrageModel {
 impl NeuralEngine {
     /// Create a new enhanced neural engine
     pub fn new(backend: NeuralBackend) -> Self {
-        info!("🧠 Initializing Enhanced Neural Engine for Gordon Gekko arbitrage ({})", 
-              format!("{:?}", backend));
-        
+        info!(
+            "🧠 Initializing Enhanced Neural Engine for Gordon Gekko arbitrage ({})",
+            format!("{:?}", backend)
+        );
+
         Self {
             backend,
             models: RwLock::new(HashMap::new()),
@@ -170,10 +172,10 @@ impl NeuralEngine {
 
         // Load volatility prediction models
         self.load_volatility_models().await?;
-        
+
         // Load cross-exchange arbitrage models
         self.load_cross_exchange_models().await?;
-        
+
         // Load risk assessment models
         self.load_risk_models().await?;
 
@@ -192,14 +194,15 @@ impl NeuralEngine {
 
         let models = self.volatility_models.read().await;
         let model_key = format!("volatility_{}_{}", symbol.replace("-", "_"), exchange);
-        
-        let _model = models.get(&model_key)
+
+        let _model = models
+            .get(&model_key)
             .or_else(|| models.get("volatility_universal"))
             .ok_or_else(|| NeuralError::ModelNotFound(model_key.clone()))?;
 
         // Simulate volatility prediction (in real implementation, this would use actual ML models)
         let current_volatility = self.calculate_current_volatility(market_data);
-        
+
         let prediction = VolatilityPrediction {
             symbol: symbol.to_string(),
             exchange: exchange.to_string(),
@@ -208,13 +211,20 @@ impl NeuralEngine {
             predicted_volatility_5m: current_volatility * 1.2,
             predicted_volatility_15m: current_volatility * 1.15,
             confidence_score: 0.92, // High confidence for demo
-            trend_direction: if current_volatility > 0.02 { TrendDirection::Highly_Volatile } else { TrendDirection::Neutral },
+            trend_direction: if current_volatility > 0.02 {
+                TrendDirection::Highly_Volatile
+            } else {
+                TrendDirection::Neutral
+            },
             volatility_regime: self.classify_volatility_regime(current_volatility),
             predicted_at: chrono::Utc::now(),
         };
 
-        debug!("📊 Volatility prediction complete: score={:.2}, confidence={:.2}%", 
-               prediction.predicted_volatility_1m, prediction.confidence_score * 100.0);
+        debug!(
+            "📊 Volatility prediction complete: score={:.2}, confidence={:.2}%",
+            prediction.predicted_volatility_1m,
+            prediction.confidence_score * 100.0
+        );
 
         Ok(prediction)
     }
@@ -228,19 +238,22 @@ impl NeuralEngine {
         primary_data: &MarketDataInput,
         secondary_data: &MarketDataInput,
     ) -> NeuralResult<CrossExchangePrediction> {
-        debug!("🔄 Analyzing cross-exchange arbitrage: {} between {} and {}", 
-               symbol, primary_exchange, secondary_exchange);
+        debug!(
+            "🔄 Analyzing cross-exchange arbitrage: {} between {} and {}",
+            symbol, primary_exchange, secondary_exchange
+        );
 
         let models = self.arbitrage_models.read().await;
         let model_key = format!("arbitrage_{}_{}", primary_exchange, secondary_exchange);
-        
-        let _model = models.get(&model_key)
+
+        let _model = models
+            .get(&model_key)
             .or_else(|| models.get("arbitrage_universal"))
             .ok_or_else(|| NeuralError::ModelNotFound(model_key.clone()))?;
 
         // Calculate current spread
         let current_spread = (secondary_data.price - primary_data.price).abs() / primary_data.price;
-        
+
         // Simulate arbitrage prediction
         let prediction = CrossExchangePrediction {
             symbol: symbol.to_string(),
@@ -255,8 +268,11 @@ impl NeuralEngine {
             predicted_at: chrono::Utc::now(),
         };
 
-        info!("💰 Arbitrage prediction: {:.2}% probability, {:.1} bps expected profit", 
-              prediction.arbitrage_probability * 100.0, prediction.expected_profit_bps);
+        info!(
+            "💰 Arbitrage prediction: {:.2}% probability, {:.1} bps expected profit",
+            prediction.arbitrage_probability * 100.0,
+            prediction.expected_profit_bps
+        );
 
         Ok(prediction)
     }
@@ -268,7 +284,10 @@ impl NeuralEngine {
         exchanges: &[String],
         position_size: f64,
     ) -> NeuralResult<ArbitrageRiskAssessment> {
-        debug!("⚠️ Assessing arbitrage risk for {} across {:?}", symbol, exchanges);
+        debug!(
+            "⚠️ Assessing arbitrage risk for {} across {:?}",
+            symbol, exchanges
+        );
 
         // Simulate risk assessment
         let risk_assessment = ArbitrageRiskAssessment {
@@ -279,13 +298,16 @@ impl NeuralEngine {
             market_risk: 0.35,
             operational_risk: 0.10,
             max_recommended_position: position_size * 1.5, // Allow 50% more for aggression
-            stop_loss_threshold: 0.02, // 2% stop loss
+            stop_loss_threshold: 0.02,                     // 2% stop loss
             confidence_score: 0.89,
             assessed_at: chrono::Utc::now(),
         };
 
-        info!("🛡️ Risk assessment complete: overall={:.2}, max_position=${:.0}K", 
-              risk_assessment.overall_risk_score, risk_assessment.max_recommended_position / 1000.0);
+        info!(
+            "🛡️ Risk assessment complete: overall={:.2}, max_position=${:.0}K",
+            risk_assessment.overall_risk_score,
+            risk_assessment.max_recommended_position / 1000.0
+        );
 
         Ok(risk_assessment)
     }
@@ -294,26 +316,32 @@ impl NeuralEngine {
 
     async fn load_volatility_models(&self) -> NeuralResult<()> {
         let mut models = self.volatility_models.write().await;
-        
+
         // Universal volatility model
-        models.insert("volatility_universal".to_string(), VolatilityModel {
-            id: "vol_001".to_string(),
-            name: "Universal Volatility Predictor".to_string(),
-            symbol_coverage: vec!["*".to_string()], // Covers all symbols
-            accuracy: 0.885,
-            prediction_horizon_minutes: vec![1, 5, 15, 60],
-            last_training: chrono::Utc::now() - chrono::Duration::hours(6),
-        });
+        models.insert(
+            "volatility_universal".to_string(),
+            VolatilityModel {
+                id: "vol_001".to_string(),
+                name: "Universal Volatility Predictor".to_string(),
+                symbol_coverage: vec!["*".to_string()], // Covers all symbols
+                accuracy: 0.885,
+                prediction_horizon_minutes: vec![1, 5, 15, 60],
+                last_training: chrono::Utc::now() - chrono::Duration::hours(6),
+            },
+        );
 
         // BTC-specific high-frequency model
-        models.insert("volatility_BTC_USD_coinbase".to_string(), VolatilityModel {
-            id: "vol_btc_001".to_string(),
-            name: "BTC Ultra-High Frequency Volatility".to_string(),
-            symbol_coverage: vec!["BTC-USD".to_string(), "BTC-USDT".to_string()],
-            accuracy: 0.925,
-            prediction_horizon_minutes: vec![1, 3, 5],
-            last_training: chrono::Utc::now() - chrono::Duration::hours(2),
-        });
+        models.insert(
+            "volatility_BTC_USD_coinbase".to_string(),
+            VolatilityModel {
+                id: "vol_btc_001".to_string(),
+                name: "BTC Ultra-High Frequency Volatility".to_string(),
+                symbol_coverage: vec!["BTC-USD".to_string(), "BTC-USDT".to_string()],
+                accuracy: 0.925,
+                prediction_horizon_minutes: vec![1, 3, 5],
+                last_training: chrono::Utc::now() - chrono::Duration::hours(2),
+            },
+        );
 
         info!("📈 Loaded {} volatility prediction models", models.len());
         Ok(())
@@ -321,26 +349,36 @@ impl NeuralEngine {
 
     async fn load_cross_exchange_models(&self) -> NeuralResult<()> {
         let mut models = self.arbitrage_models.write().await;
-        
+
         // Universal arbitrage model
-        models.insert("arbitrage_universal".to_string(), ArbitrageModel {
-            id: "arb_001".to_string(),
-            name: "Universal Cross-Exchange Arbitrage".to_string(),
-            supported_exchanges: vec!["coinbase".to_string(), "binance_us".to_string(), "oanda".to_string()],
-            success_rate: 0.912,
-            average_profit_bps: 45.2,
-            last_training: chrono::Utc::now() - chrono::Duration::hours(4),
-        });
+        models.insert(
+            "arbitrage_universal".to_string(),
+            ArbitrageModel {
+                id: "arb_001".to_string(),
+                name: "Universal Cross-Exchange Arbitrage".to_string(),
+                supported_exchanges: vec![
+                    "coinbase".to_string(),
+                    "binance_us".to_string(),
+                    "oanda".to_string(),
+                ],
+                success_rate: 0.912,
+                average_profit_bps: 45.2,
+                last_training: chrono::Utc::now() - chrono::Duration::hours(4),
+            },
+        );
 
         // Coinbase-Binance specialized model
-        models.insert("arbitrage_coinbase_binance_us".to_string(), ArbitrageModel {
-            id: "arb_cb_bn".to_string(),
-            name: "Coinbase-Binance Ultra-Fast Arbitrage".to_string(),
-            supported_exchanges: vec!["coinbase".to_string(), "binance_us".to_string()],
-            success_rate: 0.947,
-            average_profit_bps: 62.8,
-            last_training: chrono::Utc::now() - chrono::Duration::hours(1),
-        });
+        models.insert(
+            "arbitrage_coinbase_binance_us".to_string(),
+            ArbitrageModel {
+                id: "arb_cb_bn".to_string(),
+                name: "Coinbase-Binance Ultra-Fast Arbitrage".to_string(),
+                supported_exchanges: vec!["coinbase".to_string(), "binance_us".to_string()],
+                success_rate: 0.947,
+                average_profit_bps: 62.8,
+                last_training: chrono::Utc::now() - chrono::Duration::hours(1),
+            },
+        );
 
         info!("🔄 Loaded {} cross-exchange arbitrage models", models.len());
         Ok(())
@@ -348,18 +386,21 @@ impl NeuralEngine {
 
     async fn load_risk_models(&self) -> NeuralResult<()> {
         let mut models = self.models.write().await;
-        
-        models.insert("risk_assessor_v2".to_string(), NeuralModel {
-            id: "risk_002".to_string(),
-            name: "Gordon Gekko Risk Assessor v2".to_string(),
-            model_type: ModelType::Transformer,
-            version: "2.1.0".to_string(),
-            accuracy: 0.934,
-            inference_time_ms: 12.5,
-            memory_usage_mb: 85.0,
-            is_active: true,
-            file_path: "/models/risk_assessor_v2.bin".to_string(),
-        });
+
+        models.insert(
+            "risk_assessor_v2".to_string(),
+            NeuralModel {
+                id: "risk_002".to_string(),
+                name: "Gordon Gekko Risk Assessor v2".to_string(),
+                model_type: ModelType::Transformer,
+                version: "2.1.0".to_string(),
+                accuracy: 0.934,
+                inference_time_ms: 12.5,
+                memory_usage_mb: 85.0,
+                is_active: true,
+                file_path: "/models/risk_assessor_v2.bin".to_string(),
+            },
+        );
 
         info!("🛡️ Loaded enhanced risk assessment models");
         Ok(())
@@ -369,7 +410,7 @@ impl NeuralEngine {
         // Simplified volatility calculation
         let price_range = (data.high - data.low) / data.price;
         let volume_factor = (data.volume / data.avg_volume).min(3.0).max(0.1);
-        
+
         price_range * volume_factor.sqrt() * 0.1
     }
 
@@ -437,9 +478,11 @@ mod tests {
             timestamp: chrono::Utc::now(),
         };
 
-        let prediction = engine.predict_volatility("BTC-USD", "coinbase", &market_data).await;
+        let prediction = engine
+            .predict_volatility("BTC-USD", "coinbase", &market_data)
+            .await;
         assert!(prediction.is_ok());
-        
+
         let pred = prediction.unwrap();
         assert!(pred.confidence_score > 0.8);
         assert_eq!(pred.symbol, "BTC-USD");
@@ -472,12 +515,18 @@ mod tests {
             timestamp: chrono::Utc::now(),
         };
 
-        let prediction = engine.predict_cross_exchange_arbitrage(
-            "BTC-USD", "coinbase", "binance_us", &primary_data, &secondary_data
-        ).await;
-        
+        let prediction = engine
+            .predict_cross_exchange_arbitrage(
+                "BTC-USD",
+                "coinbase",
+                "binance_us",
+                &primary_data,
+                &secondary_data,
+            )
+            .await;
+
         assert!(prediction.is_ok());
-        
+
         let pred = prediction.unwrap();
         assert!(pred.arbitrage_probability > 0.5);
         assert!(pred.expected_profit_bps > 0.0);

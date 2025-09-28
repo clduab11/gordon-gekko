@@ -41,7 +41,10 @@ members = [
     "crates/trading-core",
     "crates/neural-engine",
     "crates/swarm-intelligence",
-    "crates/mcp-client"
+    "crates/mcp-client",
+    "crates/event-bus",
+    "crates/data-pipeline",
+    "crates/strategy-engine"
 ]
 
 [workspace.dependencies]
@@ -69,8 +72,10 @@ ndarray = { version = "0.15", features = ["serde"] }
 ndarray-rand = "0.14"
 
 # HTTP & WebSocket clients
-reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "stream"] }
 tokio-tungstenite = "0.21"
+wasmtime = "25.0"
+wasmtime-wasi = "25.0"
 
 # Error handling & logging
 thiserror = "1.0"
@@ -96,6 +101,11 @@ governor = "0.6"
 url = "2.5"
 tokio-util = { version = "0.7", features = ["time"] }
 futures-util = "0.3"
+
+# Concurrency primitives and serialization
+crossbeam-channel = "0.5"
+bincode = "1.3"
+bytes = "1.6"
 
 # Statistics for arbitrage engine
 statrs = "0.17"

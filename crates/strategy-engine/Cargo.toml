@@ -1,0 +1,29 @@
+[package]
+name = "strategy-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+wasmtime = "25.0"
+wasmtime-wasi = "25.0"
+bytes = { workspace = true }
+thiserror = { workspace = true }
+event-bus = { path = "../event-bus" }
+ninja-gekko-core = { path = "../../core" }
+chrono = { workspace = true }
+rust_decimal = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+once_cell = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "time"] }
+criterion = { version = "0.5", features = ["async_tokio"] }
+wat = "1.0"
+
+[[bench]]
+name = "strategy_eval"
+harness = false

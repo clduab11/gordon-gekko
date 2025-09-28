@@ -1,12 +1,14 @@
+use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use std::collections::HashMap;
 use tokio::sync::RwLock;
-use async_trait::async_trait;
-use chrono::{DateTime, Utc};
 
-use crate::types::{TradingPlatform, MarketData, Order, OrderId, Execution, Symbol, AccountId,
-                   ArbitrageOpportunity, VolatilityScore};
 use crate::error::{TradingError, TradingResult};
+use crate::types::{
+    AccountId, ArbitrageOpportunity, Execution, MarketData, Order, OrderId, Symbol,
+    TradingPlatform, VolatilityScore,
+};
 
 /// Smart Order Router for optimal venue selection and execution.
 ///
@@ -87,13 +89,18 @@ impl SmartOrderRouter {
         }
 
         // Sort by score (highest first)
-        scored_platforms.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        scored_platforms.sort_by(|a, b| {
+            b.1.total_score
+                .partial_cmp(&a.1.total_score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         // Select the best platform
         let (selected_platform, score) = &scored_platforms[0];
 
         // Update venue metrics
-        self.update_venue_metrics(selected_platform, score.total_score).await;
+        self.update_venue_metrics(selected_platform, score.total_score)
+            .await;
 
         // Execute the order on the selected platform
         let execution = self.execute_on_platform(selected_platform, order).await?;
@@ -103,7 +110,8 @@ impl SmartOrderRouter {
             platform_name: selected_platform.name.clone(),
             execution,
             routing_score: score.total_score,
-            alternatives: scored_platforms.into_iter()
+            alternatives: scored_platforms
+                .into_iter()
                 .skip(1)
                 .map(|(p, s)| (p.id.clone(), s.total_score))
                 .collect(),
@@ -111,7 +119,10 @@ impl SmartOrderRouter {
     }
 
     /// Gets available platforms that support the given symbol
-    async fn get_available_platforms(&self, symbol: &Symbol) -> TradingResult<Vec<TradingPlatform>> {
+    async fn get_available_platforms(
+        &self,
+        symbol: &Symbol,
+    ) -> TradingResult<Vec<TradingPlatform>> {
         let platforms = self.platforms.read().await;
         let available_platforms: Vec<TradingPlatform> = platforms
             .iter()
@@ -127,7 +138,11 @@ impl SmartOrderRouter {
     }
 
     /// Scores a platform for order execution
-    async fn score_platform(&self, platform: &TradingPlatform, order: &Order) -> TradingResult<PlatformScore> {
+    async fn score_platform(
+        &self,
+        platform: &TradingPlatform,
+        order: &Order,
+    ) -> TradingResult<PlatformScore> {
         let routing_rules = self.routing_rules.read().await;
         let market_data = self.market_data.read().await;
         let venue_metrics = self.venue_metrics.read().await;
@@ -166,7 +181,12 @@ impl SmartOrderRouter {
     }
 
     /// Scores platform liquidity based on order book depth and volume
-    async fn score_liquidity(&self, platform: &TradingPlatform, order: &Order, market_data: &MarketData) -> TradingResult<Decimal> {
+    async fn score_liquidity(
+        &self,
+        platform: &TradingPlatform,
+        order: &Order,
+        market_data: &MarketData,
+    ) -> TradingResult<Decimal> {
         // Higher volume and tighter spreads indicate better liquidity
         let volume_score = (market_data.volume_24h / Decimal::new(1000000, 0)) // Normalize to millions
             .min(Decimal::new(1, 0)); // Cap at 1.0
@@ -178,7 +198,9 @@ impl SmartOrderRouter {
         };
 
         // Weight volume more heavily than spread (70/30)
-        let liquidity_score = (volume_score * Decimal::new(7, 1) + spread_score * Decimal::new(3, 1)) / Decimal::new(10, 0);
+        let liquidity_score = (volume_score * Decimal::new(7, 1)
+            + spread_score * Decimal::new(3, 1))
+            / Decimal::new(10, 0);
 
         Ok(liquidity_score)
     }
@@ -235,18 +257,25 @@ impl SmartOrderRouter {
     /// Updates performance metrics for a venue
     async fn update_venue_metrics(&self, platform: &TradingPlatform, score: Decimal) {
         let mut metrics = self.venue_metrics.write().await;
-        let venue_metrics = metrics.entry(platform.id.clone()).or_insert_with(VenueMetrics::default());
+        let venue_metrics = metrics
+            .entry(platform.id.clone())
+            .or_insert_with(VenueMetrics::default);
 
         // Update running average score
         let alpha = Decimal::new(1, 1); // Learning rate (0.1)
-        venue_metrics.average_score = venue_metrics.average_score * (Decimal::new(1, 0) - alpha) + score * alpha;
+        venue_metrics.average_score =
+            venue_metrics.average_score * (Decimal::new(1, 0) - alpha) + score * alpha;
 
         // Update execution count
         venue_metrics.execution_count += 1;
     }
 
     /// Executes an order on the specified platform
-    async fn execute_on_platform(&self, platform: &TradingPlatform, order: &mut Order) -> TradingResult<Execution> {
+    async fn execute_on_platform(
+        &self,
+        platform: &TradingPlatform,
+        order: &mut Order,
+    ) -> TradingResult<Execution> {
         // This is a placeholder for actual platform execution
         // In a real implementation, this would connect to the exchange API
 
@@ -333,19 +362,6 @@ pub struct ArbitrageExecutionPlan {
     pub contingency_plans: Vec<ContingencyPlan>,
 }
 
-/// Result of arbitrage opportunity routing
-#[derive(Debug, Clone)]
-pub struct ArbitrageExecutionPlan {
-    pub opportunity_id: uuid::Uuid,
-    pub buy_platform: TradingPlatform,
-    pub sell_platform: TradingPlatform,
-    pub execution_size: Decimal,
-    pub estimated_profit: Decimal,
-    pub risk_score: f64,
-    pub execution_deadline: chrono::DateTime<chrono::Utc>,
-    pub contingency_plans: Vec<ContingencyPlan>,
-}
-
 /// Contingency plan for arbitrage execution
 #[derive(Debug, Clone)]
 pub struct ContingencyPlan {
@@ -355,18 +371,34 @@ pub struct ContingencyPlan {
 }
 
 /// Platform scoring components
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct PlatformScoreComponents {
+    pub liquidity_score: Decimal,
+    pub cost_score: Decimal,
+    pub speed_score: Decimal,
+    pub reliability_score: Decimal,
+}
+
+impl Default for PlatformScoreComponents {
+    fn default() -> Self {
+        Self {
+            liquidity_score: Decimal::ZERO,
+            cost_score: Decimal::ZERO,
+            speed_score: Decimal::ZERO,
+            reliability_score: Decimal::ZERO,
+        }
+    }
 }
 
 impl PlatformScoreComponents {
     /// Calculates the total weighted score
     pub fn calculate_total_score(&self) -> Decimal {
         // Weighted scoring: Liquidity 40%, Cost 30%, Speed 15%, Reliability 15%
-        (self.liquidity_score * Decimal::new(4, 1) +
-         self.cost_score * Decimal::new(3, 1) +
-         self.speed_score * Decimal::new(15, 2) +
-         self.reliability_score * Decimal::new(15, 2)) / Decimal::new(10, 0)
+        (self.liquidity_score * Decimal::new(4, 1)
+            + self.cost_score * Decimal::new(3, 1)
+            + self.speed_score * Decimal::new(15, 2)
+            + self.reliability_score * Decimal::new(15, 2))
+            / Decimal::new(10, 0)
     }
 }
 
@@ -431,13 +463,17 @@ impl RoutingRules {
         }
 
         // Apply cost sensitivity adjustments
-        if self.cost_sensitivity > Decimal::new(5, 1) { // High cost sensitivity
-            components.cost_score = components.cost_score * Decimal::new(12, 1); // Boost cost scoring
+        if self.cost_sensitivity > Decimal::new(5, 1) {
+            // High cost sensitivity
+            components.cost_score = components.cost_score * Decimal::new(12, 1);
+            // Boost cost scoring
         }
 
         // Apply speed sensitivity adjustments
-        if self.speed_sensitivity > Decimal::new(5, 1) { // High speed sensitivity
-            components.speed_score = components.speed_score * Decimal::new(12, 1); // Boost speed scoring
+        if self.speed_sensitivity > Decimal::new(5, 1) {
+            // High speed sensitivity
+            components.speed_score = components.speed_score * Decimal::new(12, 1);
+            // Boost speed scoring
         }
 
         // Ensure scores stay within bounds
@@ -473,7 +509,8 @@ impl VenueMetrics {
         // Calculate running average
         let total_time = self.average_execution_time * self.execution_count as f64;
         self.execution_count += 1;
-        self.average_execution_time = (total_time + execution_time_ms) / self.execution_count as f64;
+        self.average_execution_time =
+            (total_time + execution_time_ms) / self.execution_count as f64;
         self.last_update = Utc::now();
     }
 
@@ -484,7 +521,9 @@ impl VenueMetrics {
         self.execution_count += 1;
 
         // Calculate new success rate
-        self.success_rate = (current_rate * (total_attempts - 1) as f64 + if success { 1.0 } else { 0.0 }) / self.execution_count as f64;
+        self.success_rate = (current_rate * (total_attempts - 1) as f64
+            + if success { 1.0 } else { 0.0 })
+            / self.execution_count as f64;
         self.last_update = Utc::now();
     }
 }
@@ -526,9 +565,9 @@ mod tests {
 
         let market_data = MarketData::new(
             "AAPL".to_string(),
-            Decimal::new(15000, 2), // $150.00 bid
-            Decimal::new(15002, 2), // $150.02 ask
-            Decimal::new(15001, 2), // $150.01 last
+            Decimal::new(15000, 2),   // $150.00 bid
+            Decimal::new(15002, 2),   // $150.02 ask
+            Decimal::new(15001, 2),   // $150.01 last
             Decimal::new(1000000, 0), // 1M volume
         );
 
@@ -546,15 +585,22 @@ mod tests {
         rules.set_platform_preferences("AAPL".to_string(), vec!["platform1".to_string()]);
 
         assert_eq!(rules.cost_sensitivity, Decimal::new(8, 1));
-        assert_eq!(rules.platform_preferences.get(&"AAPL".to_string()).unwrap().len(), 1);
+        assert_eq!(
+            rules
+                .platform_preferences
+                .get(&"AAPL".to_string())
+                .unwrap()
+                .len(),
+            1
+        );
     }
 
     #[test]
     fn test_platform_score_calculation() {
         let mut components = PlatformScoreComponents::default();
         components.liquidity_score = Decimal::new(8, 1); // 0.8
-        components.cost_score = Decimal::new(7, 1);      // 0.7
-        components.speed_score = Decimal::new(9, 1);     // 0.9
+        components.cost_score = Decimal::new(7, 1); // 0.7
+        components.speed_score = Decimal::new(9, 1); // 0.9
         components.reliability_score = Decimal::new(6, 1); // 0.6
 
         let total_score = components.calculate_total_score();
